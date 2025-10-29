@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Followers - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
+</head>
+<body class="writer-theme">
+    <div class="header">
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <p>Your daily dose of inspiration.</p>
+    </div>
+
+    <div class="nav">
+        <a th:href="@{/writer/home(userId=${userId})}">My Posts</a>
+        <a th:href="@{/writer/post/new(userId=${userId})}">New Post</a>
+        <a th:href="@{/writer/followers(userId=${userId})}" class="active">Followers</a>
+        <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
+        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+
+    <div class="container">
+        <div style="margin-top: 2rem;">
+            <h2>Your Followers</h2>
+            <p>Here is a list of readers who follow you.</p>
+
+            <div th:if="${followers.isEmpty()}">
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <h4>You don't have any followers yet.</h4>
+                    <p>Keep writing great content to attract followers!</p>
+                </div>
+            </div>
+
+            <div th:each="follower : ${followers}" class="card" style="margin-bottom: 1rem;">
+                <h5 th:text="${follower.name}">Follower Name</h5>
+                <p th:text="'@' + ${follower.username}" style="color: #6c757d; margin-bottom: 0;">@username</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html> 

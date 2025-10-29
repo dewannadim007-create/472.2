@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestions - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
+</head>
+<body class="reader-theme">
+    <div class="header">
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <p>Your daily dose of inspiration.</p>
+    </div>
+
+    <div class="nav">
+        <a th:href="@{/reader/home(userId=${userId})}">Home</a>
+        <a th:href="@{/reader/following(userId=${userId})}">Following</a>
+        <a th:href="@{/reader/suggestions(userId=${userId})}" class="active">Suggestions</a>
+        <a th:href="@{/reader/profile(userId=${userId})}">Profile</a>
+        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+
+    <div class="container">
+        <div style="margin-top: 2rem;">
+            <h2>Find Writers to Follow</h2>
+            <p>Here are some writers we think you'll like. Follow them to see their posts on your home feed.</p>
+
+            <!-- Filter by Interest -->
+            <div style="margin-bottom: 2rem;">
+                <form th:action="@{/reader/suggestions}" method="get">
+                    <input type="hidden" name="userId" th:value="${userId}"/>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <label for="interest">Filter by interest:</label>
+                        <select id="interest" name="interest" style="flex: 1; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;">
+                            <option value="">All Interests</option>
+                            <option value="technology" th:selected="${selectedInterest == 'technology'}">Technology</option>
+                            <option value="tech" th:selected="${selectedInterest == 'tech'}">Tech</option>
+                            <option value="science" th:selected="${selectedInterest == 'science'}">Science</option>
+                            <option value="art" th:selected="${selectedInterest == 'art'}">Art</option>
+                            <option value="arts" th:selected="${selectedInterest == 'arts'}">Arts</option>
+                            <option value="music" th:selected="${selectedInterest == 'music'}">Music</option>
+                            <option value="sports" th:selected="${selectedInterest == 'sports'}">Sports</option>
+                            <option value="travel" th:selected="${selectedInterest == 'travel'}">Travel</option>
+                            <option value="food" th:selected="${selectedInterest == 'food'}">Food</option>
+                            <option value="cooking" th:selected="${selectedInterest == 'cooking'}">Cooking</option>
+                            <option value="fashion" th:selected="${selectedInterest == 'fashion'}">Fashion</option>
+                            <option value="style" th:selected="${selectedInterest == 'style'}">Style</option>
+                            <option value="health" th:selected="${selectedInterest == 'health'}">Health</option>
+                            <option value="fitness" th:selected="${selectedInterest == 'fitness'}">Fitness</option>
+                            <option value="education" th:selected="${selectedInterest == 'education'}">Education</option>
+                            <option value="business" th:selected="${selectedInterest == 'business'}">Business</option>
+                            <option value="politics" th:selected="${selectedInterest == 'politics'}">Politics</option>
+                            <option value="entertainment" th:selected="${selectedInterest == 'entertainment'}">Entertainment</option>
+                            <option value="lifestyle" th:selected="${selectedInterest == 'lifestyle'}">Lifestyle</option>
+                            <option value="gaming" th:selected="${selectedInterest == 'gaming'}">Gaming</option>
+                            <option value="books" th:selected="${selectedInterest == 'books'}">Books</option>
+                            <option value="reading" th:selected="${selectedInterest == 'reading'}">Reading</option>
+                            <option value="photography" th:selected="${selectedInterest == 'photography'}">Photography</option>
+                            <option value="design" th:selected="${selectedInterest == 'design'}">Design</option>
+                            <option value="finance" th:selected="${selectedInterest == 'finance'}">Finance</option>
+                            <option value="marketing" th:selected="${selectedInterest == 'marketing'}">Marketing</option>
+                        </select>
+                        <button type="submit" class="btn">Filter</button>
+                        <a th:href="@{/reader/suggestions(userId=${userId})}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="success-message" th:if="${param.successMessage}" th:text="${param.successMessage}"></div>
+            <div class="error-message" th:if="${param.errorMessage}" th:text="${param.errorMessage}"></div>
+
+            <div th:if="${suggestedWriters.isEmpty()}">
+                <p>No new writer suggestions at the moment. Check back later!</p>
+            </div>
+
+            <div th:each="writer : ${suggestedWriters}" class="card" style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 th:text="${writer.name}">Writer Name</h4>
+                        <p th:text="'@' + ${writer.username}" style="margin: 0.5rem 0; color: #6c757d;">@username</p>
+                        <small th:text="'Interests: ' + ${writer.interests != null ? #strings.listJoin(writer.interests, ', ') : 'No interests specified'}"></small>
+                    </div>
+                    <form th:action="@{/reader/follow/{writerId}(writerId=${writer.id})}" method="post">
+                        <input type="hidden" name="userId" th:value="${userId}"/>
+                        <button type="submit" class="btn btn-success">Follow</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html> 

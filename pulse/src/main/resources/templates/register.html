@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
+</head>
+<body class="auth-theme">
+    <div class="header">
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <p>Your daily dose of inspiration.</p>
+        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin-top: 1rem; cursor: pointer;">🌙</button>
+    </div>
+
+    <div class="container auth-container">
+        <div class="form-container">
+            <h2 style="margin-bottom: 0.5rem;">Create an Account</h2>
+            <p style="margin-bottom: 2rem; color: #718096;">Join Flicker today. It's free and only takes a minute.</p>
+
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <form th:action="@{/register}" th:object="${registrationDTO}" method="post">
+                <!-- Basic Info Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" th:field="*{username}" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" th:field="*{name}" required>
+                    </div>
+                </div>
+
+                <!-- Password Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" th:field="*{password}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>
+                    </div>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="role">Role</label>
+                    <select id="role" th:field="*{role}" required>
+                        <option value="">Select your role</option>
+                        <option value="READER">Reader</option>
+                        <option value="WRITER">Writer</option>
+                    </select>
+                </div>
+
+                <!-- Interests Section -->
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label style="margin-bottom: 1rem;">Interests (Optional)</label>
+                    <div class="interests-grid">
+                        <div class="interests-column">
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="technology">
+                                <span>Technology</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="science">
+                                <span>Science</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="art">
+                                <span>Art</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="music">
+                                <span>Music</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="sports">
+                                <span>Sports</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="travel">
+                                <span>Travel</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="food">
+                                <span>Food</span>
+                            </label>
+                        </div>
+                        <div class="interests-column">
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="fashion">
+                                <span>Fashion</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="health">
+                                <span>Health</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="education">
+                                <span>Education</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="business">
+                                <span>Business</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="gaming">
+                                <span>Gaming</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="books">
+                                <span>Books</span>
+                            </label>
+                            <label class="interest-item">
+                                <input type="checkbox" name="selectedInterests" value="photography">
+                                <span>Photography</span>
+                            </label>
+                        </div>
+                    </div>
+                    <small style="margin-top: 0.5rem; display: block;">Select your interests to get personalized content</small>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-bottom: 1rem;">Create Account</button>
+            </form>
+            <p style="text-align: center; margin: 0;">
+                Already have an account? <a th:href="@{/login}">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html> 

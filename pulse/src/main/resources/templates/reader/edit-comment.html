@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Comment - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
+</head>
+<body class="reader-theme">
+    <div class="header">
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <p>Your daily dose of inspiration.</p>
+    </div>
+
+    <div class="nav">
+        <a th:href="@{/reader/home(userId=${userId})}">Home</a>
+        <a th:href="@{/reader/following(userId=${userId})}">Following</a>
+        <a th:href="@{/reader/suggestions(userId=${userId})}">Suggestions</a>
+        <a th:href="@{/reader/profile(userId=${userId})}">Profile</a>
+        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="form-container" style="margin-top: 2rem;">
+            <h2>Edit Your Comment</h2>
+            <p>Make changes to your comment below and save.</p>
+
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <form th:action="@{/comment/edit/{id}(id=${comment.id})}" th:object="${createCommentDTO}" method="post">
+                <input type="hidden" name="userId" th:value="${userId}"/>
+                <div class="form-group">
+                    <label for="content">Comment</label>
+                    <textarea id="content" th:field="*{content}" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+                <a th:href="@{/reader/home(userId=${userId})}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html> 

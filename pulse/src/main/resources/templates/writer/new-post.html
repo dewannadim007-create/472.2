@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Post - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="icon" a="1" type="image/png" th:href="@{/images/FLICKER.png}">
+</head>
+<body class="writer-theme">
+    <div class="header">
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <p>Your daily dose of inspiration.</p>
+    </div>
+
+    <div class="nav">
+        <a th:href="@{/writer/home(userId=${userId})}">My Posts</a>
+        <a th:href="@{/writer/post/new(userId=${userId})}" class="active">New Post</a>
+        <a th:href="@{/writer/followers(userId=${userId})}">Followers</a>
+        <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
+        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="form-container" style="margin-top: 2rem;">
+            <h2>Create a New Post</h2>
+            <p>Share your thoughts with your followers.</p>
+
+            <div class="error-message" th:if="${#fields.hasErrors('${createPostDTO.*}')}">
+                <ul>
+                    <li th:each="err : ${#fields.errors('${createPostDTO.*}')}" th:text="${err}"></li>
+                </ul>
+            </div>
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <form id="post-form" th:action="@{/writer/post/with-image}" th:object="${createPostDTO}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="userId" th:value="${userId}"/>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" th:field="*{content}" rows="10" required autofocus></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="imageFile">Image (Optional)</label>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(this)">
+                    <small>Supported formats: JPG, PNG, GIF, BMP, WebP. Max size: 10MB</small>
+                </div>
+                
+                <div id="imagePreview" style="display: none; margin: 1rem 0;">
+                    <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <button type="button" onclick="removeImage()" class="btn btn-danger btn-sm" style="margin-top: 0.5rem;">Remove Image</button>
+                </div>
+                
+                <div class="form-group" id="captionGroup" style="display: none;">
+                    <label for="imageCaption">Image Caption (Optional)</label>
+                    <input type="text" id="imageCaption" th:field="*{imageCaption}" placeholder="Add a caption to your image...">
+                </div>
+                
+                <button type="submit" class="btn">Publish Post</button>
+                <button type="button" id="ai-generate-btn" class="btn btn-secondary">Generate with AI</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Image preview functionality
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('captionGroup').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function removeImage() {
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('captionGroup').style.display = 'none';
+            document.getElementById('imageCaption').value = '';
+        }
+        
+        document.getElementById('ai-generate-btn').addEventListener('click', function() {
+            var content = document.getElementById('content').value;
+            if (!content) {
+                alert('Please enter some content first to generate more.');
+                return;
+            }
+
+            fetch('/writer/generate-content?content=' + encodeURIComponent(content))
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('content').value = data;
+                })
+                .catch(error => {
+                    console.error('Error generating AI content:', error);
+                    alert('Failed to generate AI content. Please try again.');
+                });
+        });
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light theme
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon
+        function updateThemeIcon(theme) {
+            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html> 
