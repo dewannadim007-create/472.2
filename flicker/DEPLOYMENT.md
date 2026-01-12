@@ -20,7 +20,7 @@ This guide will help you deploy the Flicker Spring Boot application to Render.co
 7. Replace `<password>` with your actual password
 8. Add `/FLICKER` before the `?` to specify the database name
 
-Example: `mongodb+srv://nadim:yourpassword@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority`
+Example: `mongodb+srv://username:yourpassword@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority`
 
 ## Step 2: Prepare Your Repository
 
@@ -84,7 +84,7 @@ Click **"Advanced"** → **"Add Environment Variable"** and add:
 
 **Example MONGODB_URI**:
 ```
-mongodb+srv://nadim:NEW_PASSWORD@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority
+mongodb+srv://your-username:your-new-password@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority
 ```
 
 ### 3.4 Deploy
