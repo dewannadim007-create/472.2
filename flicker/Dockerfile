@@ -29,5 +29,5 @@ COPY --from=build /app/target/*.jar app.jar
 # Expose port (Render will override with PORT env var)
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with JVM optimizations for containers
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-XX:+UseContainerSupport", "-jar", "app.jar"]
