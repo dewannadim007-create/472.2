@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+application-local.properties
+application-prod.properties
+
+# Uploads directory
+uploads/
+/tmp/
