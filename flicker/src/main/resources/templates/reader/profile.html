@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -46,35 +46,51 @@
             </div>
 
             <!-- Profile View Mode -->
-            <div th:unless="${profileEditDTO}">
-                <h2 style="margin-top: 0;">My Profile</h2>
-                <div class="profile-info">
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label
-                            style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-secondary);">Username</label>
-                        <p th:text="${currentUser.username}"
-                            style="margin: 0; padding: 8px; background: var(--bg-color); border-radius: 4px;"></p>
+            <div th:unless="${profileEditDTO}" style="width: 100%;">
+                <div class="profile-header-container">
+                    <div class="profile-cover"></div>
+                    <div class="profile-info">
+                        <div class="profile-avatar-large">
+                            <div class="profile-avatar-inner"
+                                th:if="${currentUser.profilePhotoUrl == null || currentUser.profilePhotoUrl.isEmpty()}"
+                                th:text="${#strings.substring(currentUser.name, 0, 1)}">U
+                            </div>
+                            <img th:if="${currentUser.profilePhotoUrl != null && !currentUser.profilePhotoUrl.isEmpty()}"
+                                th:src="${currentUser.profilePhotoUrl}" alt="Profile Photo"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </div>
+                        <div class="profile-details">
+                            <h2 th:text="${currentUser.name}">User Name</h2>
+                            <p th:text="'@' + ${currentUser.username}">@username</p>
+                            <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                <span class="badge"
+                                    style="background: var(--bg-hover); padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; font-weight: 600;"
+                                    th:text="${currentUser.role}">Role</span>
+                            </div>
+                        </div>
+                        <div style="margin-left: auto; margin-top: 1rem;">
+                            <a th:href="@{/reader/profile/edit(userId=${userId})}" class="btn btn-secondary">Edit
+                                Profile</a>
+                        </div>
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label
-                            style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-secondary);">Full
-                            Name</label>
-                        <p th:text="${currentUser.name}"
-                            style="margin: 0; padding: 8px; background: var(--bg-color); border-radius: 4px;"></p>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h3
+                        style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        About</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div class="card" style="padding: 1rem;">
+                            <h5 style="margin-top: 0; color: var(--text-secondary);">Interests</h5>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                                <span th:each="interest : ${currentUser.interests}" th:text="${interest}"
+                                    style="background: var(--bg-hover); padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">Interest</span>
+                                <span th:if="${currentUser.interests == null || currentUser.interests.isEmpty()}"
+                                    style="color: var(--text-tertiary); font-style: italic;">No interests added
+                                    yet.</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label
-                            style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-secondary);">Role</label>
-                        <p th:text="${currentUser.role}"
-                            style="margin: 0; padding: 8px; background: var(--bg-color); border-radius: 4px;"></p>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label
-                            style="display: block; font-weight: bold; margin-bottom: 5px; color: var(--text-secondary);">Interests</label>
-                        <p th:text="${currentUser.interests != null && !currentUser.interests.isEmpty() ? #strings.listJoin(currentUser.interests, ', ') : 'No interests specified'}"
-                            style="margin: 0; padding: 8px; background: var(--bg-color); border-radius: 4px;"></p>
-                    </div>
-                    <a th:href="@{/reader/profile/edit(userId=${userId})}" class="btn">Edit Profile</a>
                 </div>
             </div>
 
@@ -83,8 +99,12 @@
                 <h2 style="margin-top: 0;">Edit Profile</h2>
                 <p>Keep your profile information up to date.</p>
 
+
                 <form th:action="@{/reader/profile/edit}" th:object="${profileEditDTO}" method="post">
                     <input type="hidden" name="userId" th:value="${userId}" />
+
+
+
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label for="username"
                             style="display: block; font-weight: bold; margin-bottom: 5px;">Username</label>

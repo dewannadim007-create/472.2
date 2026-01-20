@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suggestions - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -97,24 +97,25 @@
                 style="background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
             </div>
 
-            <div th:if="${suggestedWriters.isEmpty()}">
-                <p>No new writer suggestions at the moment. Check back later!</p>
+            <div th:if="${suggestedWriters.isEmpty()}"
+                style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                <p>No new writer suggestions at the moment. Try adjusting your filters!</p>
             </div>
 
-            <div th:each="writer : ${suggestedWriters}" class="card"
-                style="background: var(--card-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h4 th:text="${writer.name}" style="margin: 0;">Writer Name</h4>
-                        <p th:text="'@' + ${writer.username}"
-                            style="margin: 0.25rem 0; font-size: 0.9rem; color: var(--text-secondary);">@username</p>
-                        <small
-                            th:text="'Interests: ' + ${writer.interests != null ? #strings.listJoin(writer.interests, ', ') : 'No interests specified'}"></small>
+            <div class="user-card-grid">
+                <div th:each="writer : ${suggestedWriters}" class="user-card">
+                    <div class="user-avatar" th:text="${#strings.substring(writer.name, 0, 1)}">W</div>
+                    <h3 th:text="${writer.name}" style="margin-bottom: 4px;">Writer Name</h3>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;"
+                        th:text="${writer.interests != null && !writer.interests.isEmpty() ? #strings.listJoin(writer.interests, ', ') : 'General'}">
+                        Interests</p>
+
+                    <div style="margin-top: auto; width: 100%; padding-top: var(--spacing-md);">
+                        <form th:action="@{/reader/follow/{writerId}(writerId=${writer.id})}" method="post">
+                            <input type="hidden" name="userId" th:value="${userId}" />
+                            <button type="submit" class="btn btn-sm" style="width: 100%;">Follow</button>
+                        </form>
                     </div>
-                    <form th:action="@{/reader/follow/{writerId}(writerId=${writer.id})}" method="post">
-                        <input type="hidden" name="userId" th:value="${userId}" />
-                        <button type="submit" class="btn">Follow</button>
-                    </form>
                 </div>
             </div>
         </div>

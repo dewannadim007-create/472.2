@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Followers - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -43,16 +43,21 @@
             </p>
 
             <div th:if="${followers.isEmpty()}"
-                style="background: var(--card-bg); padding: 2rem; border-radius: 4px; border: 1px solid var(--border-color); text-align: center;">
+                style="background: var(--card-bg); padding: 3rem; border-radius: 8px; border: 1px dashed var(--border-color); text-align: center;">
                 <h4>You don't have any followers yet.</h4>
                 <p>Keep writing great content to attract followers!</p>
             </div>
 
-            <div th:each="follower : ${followers}" class="card"
-                style="background: var(--card-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 1rem;">
-                <h5 th:text="${follower.name}" style="margin: 0;">Follower Name</h5>
-                <p th:text="'@' + ${follower.username}"
-                    style="margin: 0.25rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">@username</p>
+            <div class="user-card-grid">
+                <div th:each="follower : ${followers}" class="user-card">
+                    <div class="user-avatar" th:text="${#strings.substring(follower.name, 0, 1)}">U</div>
+                    <h3 th:text="${follower.name}">Follower Name</h3>
+                    <p th:text="'@' + ${follower.username}">@username</p>
+                    <div style="margin-top: auto; width: 100%;">
+                        <!-- Optional: Follow Back button or View Profile logic could go here -->
+                        <button class="btn btn-secondary btn-sm" style="width: 100%;">View Profile</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

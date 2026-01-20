@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Posts - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <title>Writer Dashboard - Flicker</title>
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
+    <script th:src="@{/js/votes.js}" defer></script>
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -37,103 +38,96 @@
     </div>
 
     <div class="container">
-        <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0;">Welcome, <strong th:text="${currentUser.name}">Writer</strong>!</h2>
-            <form th:action="@{/writer/home}" method="get" style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="hidden" name="userId" th:value="${userId}" />
-                <select name="sortBy" id="sortBy" onchange="this.form.submit();" style="min-width: 150px;">
-                    <option value="newest"
-                        th:selected="${#strings.isEmpty(sortBy) or #strings.equals(sortBy, 'newest')}">Newest First
-                    </option>
-                    <option value="oldest" th:selected="${#strings.equals(sortBy, 'oldest')}">Oldest First</option>
-                    <option value="upvotes" th:selected="${#strings.equals(sortBy, 'upvotes')}">Most Upvoted</option>
-                </select>
-            </form>
+        <div class="welcome-header"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+            <div>
+                <h2 style="margin: 0;">Dashboard</h2>
+                <p style="margin: 0; color: var(--text-secondary);">Welcome back, <strong
+                        th:text="${currentUser.name}">Writer</strong>.</p>
+            </div>
+            <a th:href="@{/writer/post/new(userId=${userId})}" class="btn">Create New Post</a>
         </div>
 
-        <div style="margin-top: 1rem; width: 100%;">
+        <!-- Dashboard Stats -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-label">Total Posts</span>
+                <span class="stat-value" th:text="${posts.size()}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Upvotes</span>
+                <!-- Simple sum for display, ideally calculated in backend -->
+                <span class="stat-value" th:text="${#aggregates.sum(posts.![upvoteCount]) ?: 0}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Downvotes</span>
+                <span class="stat-value" th:text="${#aggregates.sum(posts.![downvoteCount]) ?: 0}">0</span>
+            </div>
+        </div>
+
+        <div style="width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3>Your Posts</h3>
-                <a th:href="@{/writer/post/new(userId=${userId})}" class="btn">Create New Post</a>
+                <h3>Your Recent Posts</h3>
+                <form th:action="@{/writer/home}" method="get" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="hidden" name="userId" th:value="${userId}" />
+                    <select name="sortBy" id="sortBy" onchange="this.form.submit();"
+                        style="min-width: 150px; padding: 6px;">
+                        <option value="newest"
+                            th:selected="${#strings.isEmpty(sortBy) or #strings.equals(sortBy, 'newest')}">Newest First
+                        </option>
+                        <option value="oldest" th:selected="${#strings.equals(sortBy, 'oldest')}">Oldest First</option>
+                        <option value="upvotes" th:selected="${#strings.equals(sortBy, 'upvotes')}">Most Upvoted
+                        </option>
+                    </select>
+                </form>
             </div>
 
-            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"
-                style="background: #D4EDDA; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
-            </div>
-            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"
-                style="background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
-            </div>
+            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
             <div th:if="${posts.isEmpty()}"
-                style="text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px;">
+                style="text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px; border: 1px dashed var(--border-color);">
                 <h4>You haven't written any posts yet.</h4>
+                <p style="color: var(--text-secondary);">Start sharing your ideas with the world.</p>
                 <a th:href="@{/writer/post/new(userId=${userId})}" class="btn" style="margin-top: 1rem;">Write Your
                     First Post</a>
             </div>
 
-            <div th:each="post : ${posts}" class="post">
-                <!-- Left Sidebar: Stats -->
-                <div class="post-actions" style="width: 60px;">
-                    <div style="text-align: center; margin-bottom: 8px;">
-                        <span style="display: block; font-size: 1.2rem;">⬆️</span>
-                        <small th:text="${post.upvoteCount}">0</small>
-                    </div>
-                    <div style="text-align: center;">
-                        <span style="display: block; font-size: 1.2rem;">⬇️</span>
-                        <small th:text="${post.downvoteCount}">0</small>
-                    </div>
+            <div th:each="post : ${posts}" class="postWriter"
+                style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1rem; padding: 16px; display: flex; gap: 1rem; align-items: flex-start;">
+                <!-- Analytics Sidebar -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; min-width: 50px; padding-right: 1rem; border-right: 1px solid var(--border-color);">
+                    <span style="font-size: 1.2rem; color: var(--primary-color); font-weight: bold;"
+                        th:text="${post.upvoteCount - post.downvoteCount}">0</span>
+                    <small
+                        style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase;">Score</small>
                 </div>
 
-                <!-- Right Content -->
-                <div class="post-wrapper">
-                    <div class="post-header">
-                        <small
-                            th:text="'Published: ' + ${#temporals.format(post.timestamp, 'MMM dd, yyyy, hh:mm a')}">Date</small>
+                <!-- Content -->
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <small style="color: var(--text-secondary);"
+                            th:text="${#temporals.format(post.timestamp, 'MMM dd, yyyy')}">Date</small>
+                        <div style="display: flex; gap: 4px;">
+                            <a th:href="@{/writer/post/{postId}/edit(postId=${post.id}, userId=${userId})}"
+                                class="btn btn-link">Edit</a>
+                            <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post"
+                                style="display:inline;" onsubmit="return confirm('Delete this post?');">
+                                <input type="hidden" name="userId" th:value="${userId}" />
+                                <button type="submit" class="btn btn-link text-danger">Delete</button>
+                            </form>
+                        </div>
                     </div>
 
-                    <p th:text="${post.content}" style="margin-bottom: 10px;">Content</p>
-
-                    <div th:if="${post.imageUrl != null and !post.imageUrl.isEmpty()}" class="post-image"
-                        style="margin-bottom: 10px;">
-                        <img th:src="${post.imageUrl}" th:alt="${post.imageCaption}">
-                    </div>
+                    <div style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-primary); max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;"
+                        th:text="${post.content}">Content Preview</div>
 
                     <div
-                        style="display: flex; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
-                        <a th:href="@{/writer/post/{postId}/edit(postId=${post.id}, userId=${userId})}"
-                            class="btn btn-secondary btn-xs" style="border-radius: 4px;">Edit</a>
-                        <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post"
-                            style="display:inline;" onsubmit="return confirm('Delete this post?');">
-                            <input type="hidden" name="userId" th:value="${userId}" />
-                            <button type="submit" class="btn btn-secondary btn-xs"
-                                style="color: #d93025; border-color: #d93025; border-radius: 4px;">Delete</button>
-                        </form>
-                        <span style="margin-left: auto; color: var(--text-secondary); font-size: 0.9rem;">💬 <span
-                                th:text="${post.comments != null ? post.comments.size() : 0}">0</span> Comments</span>
-                    </div>
-
-                    <!-- Comments Section (Collapsed/Simple for Writer to view) -->
-                    <div class="comments-section" th:if="${post.comments != null and !post.comments.isEmpty()}">
-                        <h5 style="margin: 0 0 10px 0;">Recent Comments</h5>
-                        <div th:each="comment, iterStat : ${post.comments}" th:if="${iterStat.index < 3}"
-                            class="comment">
-                            <small><strong th:text="${comment.authorName}">User</strong>: <span
-                                    th:text="${comment.content}">Content</span></small>
-                        </div>
-                        <div th:if="${post.comments.size() > 3}" style="text-align: center; margin-top: 5px;">
-                            <small style="color: var(--primary-color); cursor: pointer;">View all comments</small>
-                        </div>
-                    </div>
-
-                    <!-- Reply Box -->
-                    <div class="add-comment-form" style="margin-top: 10px;">
-                        <form th:action="@{/comment/create}" method="post" style="display: flex; gap: 8px;">
-                            <input type="hidden" name="postId" th:value="${post.id}" />
-                            <input type="hidden" name="userId" th:value="${userId}" />
-                            <input type="text" name="content" placeholder="Reply as author..."
-                                style="flex: 1; font-size: 0.9rem;">
-                            <button type="submit" class="btn btn-sm">Reply</button>
-                        </form>
+                        style="display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                        <span>💬 <span th:text="${post.comments != null ? post.comments.size() : 0}">0</span>
+                            comments</span>
+                        <span th:if="${post.imageUrl != null}">📷 Has Image</span>
                     </div>
                 </div>
             </div>

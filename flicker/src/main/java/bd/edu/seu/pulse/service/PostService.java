@@ -21,22 +21,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class PostService {
-    
+
     @Autowired
     private PostRepository postRepository;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private CommentRepository commentRepository;
-    
+
     @Autowired
     private CommentService commentService;
-    
+
     @Autowired
     private FileUploadService fileUploadService;
-    
+
     public String createPost(String authorId, CreatePostDTO dto) {
         if (authorId == null || authorId.isEmpty()) {
             return "Author ID is required";
@@ -44,7 +44,7 @@ public class PostService {
         if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
             return "Post content is required";
         }
-        
+
         User author = userRepository.findById(authorId).orElse(null);
         if (author == null) {
             return "Author not found";
@@ -52,7 +52,7 @@ public class PostService {
         if (!author.getRole().equals("WRITER")) {
             return "Only writers can create posts";
         }
-        
+
         Post post = new Post();
         post.setAuthorId(authorId);
         post.setContent(dto.getContent().trim());
@@ -61,15 +61,15 @@ public class PostService {
         post.setDownvoteCount(0);
         post.setUpvotedBy(new ArrayList<>());
         post.setDownvotedBy(new ArrayList<>());
-        
+
         if (dto.getImageCaption() != null && !dto.getImageCaption().trim().isEmpty()) {
             post.setImageCaption(dto.getImageCaption().trim());
         }
-        
+
         postRepository.save(post);
         return "SUCCESS";
     }
-    
+
     public String createPostWithImage(String authorId, CreatePostDTO dto, MultipartFile imageFile) {
         if (authorId == null || authorId.isEmpty()) {
             return "Author ID is required";
@@ -77,7 +77,7 @@ public class PostService {
         if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
             return "Post content is required";
         }
-        
+
         User author = userRepository.findById(authorId).orElse(null);
         if (author == null) {
             return "Author not found";
@@ -85,7 +85,7 @@ public class PostService {
         if (!author.getRole().equals("WRITER")) {
             return "Only writers can create posts";
         }
-        
+
         Post post = new Post();
         post.setAuthorId(authorId);
         post.setContent(dto.getContent().trim());
@@ -94,14 +94,14 @@ public class PostService {
         post.setDownvoteCount(0);
         post.setUpvotedBy(new ArrayList<>());
         post.setDownvotedBy(new ArrayList<>());
-        
+
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 String imageUrl = fileUploadService.uploadImage(imageFile);
                 post.setImageUrl(imageUrl);
                 post.setImageFileName(imageFile.getOriginalFilename());
                 post.setImageFileSize(imageFile.getSize());
-                
+
                 if (dto.getImageCaption() != null && !dto.getImageCaption().trim().isEmpty()) {
                     post.setImageCaption(dto.getImageCaption().trim());
                 }
@@ -109,11 +109,11 @@ public class PostService {
                 return "Error uploading image: " + e.getMessage();
             }
         }
-        
+
         postRepository.save(post);
         return "SUCCESS";
     }
-    
+
     public List<PostViewDTO> getPostsByWriter(String writerId, String sortBy) {
         if (writerId == null || writerId.isEmpty()) {
             return new ArrayList<>();
@@ -152,7 +152,7 @@ public class PostService {
 
         return postDTOs;
     }
-    
+
     public List<PostViewDTO> getFeedForReader(String readerId) {
         if (readerId == null || readerId.isEmpty()) {
             return new ArrayList<>();
@@ -179,7 +179,8 @@ public class PostService {
 
         List<PostViewDTO> postDTOs = posts.stream()
                 .map(post -> {
-                    PostViewDTO dto = toPostViewDTO(post, authorNames.getOrDefault(post.getAuthorId(), "Unknown Author"), readerId);
+                    PostViewDTO dto = toPostViewDTO(post,
+                            authorNames.getOrDefault(post.getAuthorId(), "Unknown Author"), readerId);
                     List<CommentViewDTO> comments = commentService.getCommentsByPost(post.getId(), readerId);
                     dto.setComments(comments);
                     return dto;
@@ -214,7 +215,7 @@ public class PostService {
 
         return postDTOs;
     }
-    
+
     public String upvotePost(String postId, String userId) {
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null || userId == null) {
@@ -232,13 +233,13 @@ public class PostService {
                 post.getDownvotedBy().remove(userId);
             }
         }
-        
+
         post.setUpvoteCount(post.getUpvotedBy().size());
         post.setDownvoteCount(post.getDownvotedBy().size());
         postRepository.save(post);
         return "SUCCESS";
     }
-    
+
     public String downvotePost(String postId, String userId) {
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null || userId == null) {
@@ -256,50 +257,88 @@ public class PostService {
                 post.getUpvotedBy().remove(userId);
             }
         }
-        
+
         post.setUpvoteCount(post.getUpvotedBy().size());
         post.setDownvoteCount(post.getDownvotedBy().size());
         postRepository.save(post);
         return "SUCCESS";
     }
-    
+
     public Post getPostById(String postId) {
         return postRepository.findById(postId).orElse(null);
     }
-    
+
     public String updatePost(String postId, String authorId, CreatePostDTO dto) {
+        return updatePost(postId, authorId, dto, null, false);
+    }
+
+    public String updatePost(String postId, String authorId, CreatePostDTO dto, MultipartFile imageFile,
+            boolean removeImage) {
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null) {
             return "Post not found";
         }
-        
+
         if (!post.getAuthorId().equals(authorId)) {
             return "You can only edit your own posts";
         }
-        
+
         if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
             return "Post content is required";
         }
-        
+
         post.setContent(dto.getContent().trim());
+
+        if (dto.getImageCaption() != null) {
+            post.setImageCaption(dto.getImageCaption().trim());
+        }
+
+        if (removeImage) {
+            // Logic to remove existing image
+            if (post.getImageUrl() != null) {
+                fileUploadService.deleteImage(post.getImageUrl());
+                post.setImageUrl(null);
+                post.setImageFileName(null);
+                post.setImageFileSize(null);
+                post.setImageCaption(null);
+            }
+        } else if (imageFile != null && !imageFile.isEmpty()) {
+            // Logic to update/replace image
+            try {
+                // Delete old image if exists
+                if (post.getImageUrl() != null) {
+                    fileUploadService.deleteImage(post.getImageUrl());
+                }
+
+                String imageUrl = fileUploadService.uploadImage(imageFile);
+                post.setImageUrl(imageUrl);
+                post.setImageFileName(imageFile.getOriginalFilename());
+                post.setImageFileSize(imageFile.getSize());
+
+                // Caption is already set above if provided
+            } catch (Exception e) {
+                return "Error uploading image: " + e.getMessage();
+            }
+        }
+
         postRepository.save(post);
         return "SUCCESS";
     }
-    
+
     public String deletePost(String postId, String authorId) {
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null) {
             return "Post not found";
         }
-        
+
         if (!post.getAuthorId().equals(authorId)) {
             return "You can only delete your own posts";
         }
-        
+
         postRepository.delete(post);
         return "SUCCESS";
     }
-    
+
     public List<PostViewDTO> getAllPosts(String sortBy) {
         Sort sort = Sort.by(Sort.Direction.DESC, "timestamp");
         if ("oldest".equals(sortBy)) {
@@ -333,7 +372,7 @@ public class PostService {
     private PostViewDTO toPostViewDTO(Post post, String authorName) {
         return toPostViewDTO(post, authorName, null);
     }
-    
+
     private PostViewDTO toPostViewDTO(Post post, String authorName, String currentUserId) {
         PostViewDTO dto = new PostViewDTO();
         dto.setId(post.getId());
@@ -347,12 +386,12 @@ public class PostService {
         dto.setImageCaption(post.getImageCaption());
         dto.setImageFileName(post.getImageFileName());
         dto.setImageFileSize(post.getImageFileSize());
-        
+
         if (currentUserId != null) {
             dto.setHasUpvoted(post.getUpvotedBy().contains(currentUserId));
             dto.setHasDownvoted(post.getDownvotedBy().contains(currentUserId));
         }
-        
+
         return dto;
     }
-} 
+}

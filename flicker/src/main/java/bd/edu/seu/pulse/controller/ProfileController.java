@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 public class ProfileController {
-    
+
     @Autowired
     private UserService userService;
 
@@ -53,12 +53,12 @@ public class ProfileController {
         model.addAttribute("userId", userId);
         return "profile";
     }
-    
+
     @PostMapping("/profile/edit")
     public String editProfile(@ModelAttribute ProfileEditDTO profileEditDTO,
-                              @RequestParam String userId,
-                              @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
-                              Model model) {
+            @RequestParam String userId,
+            @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
+            Model model) {
         if (userId == null || userId.trim().isEmpty()) {
             return "redirect:/login";
         }
@@ -111,12 +111,12 @@ public class ProfileController {
         model.addAttribute("userId", userId);
         return "reader/profile";
     }
-    
+
     @PostMapping("/reader/profile/edit")
     public String editReaderProfile(@ModelAttribute ProfileEditDTO profileEditDTO,
-                                    @RequestParam String userId,
-                                    @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
-                                    Model model) {
+            @RequestParam String userId,
+            @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
+            Model model) {
         if (userId == null || userId.trim().isEmpty()) {
             return "redirect:/login";
         }
@@ -169,12 +169,12 @@ public class ProfileController {
         model.addAttribute("userId", userId);
         return "writer/profile";
     }
-    
+
     @PostMapping("/writer/profile/edit")
     public String editWriterProfile(@ModelAttribute ProfileEditDTO profileEditDTO,
-                                    @RequestParam String userId,
-                                    @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
-                                    Model model) {
+            @RequestParam String userId,
+            @RequestParam(value = "selectedInterests", required = false) List<String> selectedInterests,
+            Model model) {
         if (userId == null || userId.trim().isEmpty()) {
             return "redirect:/login";
         }
@@ -190,4 +190,74 @@ public class ProfileController {
             return "redirect:/writer/profile?userId=" + userId + "&errorMessage=" + result;
         }
     }
-} 
+
+    // Profile Photo Endpoints for Writer
+    @PostMapping("/writer/profile/photo/upload")
+    public String uploadWriterProfilePhoto(@RequestParam String userId,
+            @RequestParam("profilePhoto") org.springframework.web.multipart.MultipartFile photoFile,
+            Model model) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "redirect:/login";
+        }
+
+        if (photoFile == null || photoFile.isEmpty()) {
+            return "redirect:/writer/profile?userId=" + userId + "&errorMessage=Please select a photo to upload";
+        }
+
+        String result = userService.updateProfilePhoto(userId, photoFile);
+        if ("SUCCESS".equals(result)) {
+            return "redirect:/writer/profile?userId=" + userId + "&successMessage=Profile photo updated!";
+        } else {
+            return "redirect:/writer/profile?userId=" + userId + "&errorMessage=" + result;
+        }
+    }
+
+    @PostMapping("/writer/profile/photo/remove")
+    public String removeWriterProfilePhoto(@RequestParam String userId, Model model) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "redirect:/login";
+        }
+
+        String result = userService.removeProfilePhoto(userId);
+        if ("SUCCESS".equals(result)) {
+            return "redirect:/writer/profile?userId=" + userId + "&successMessage=Profile photo removed!";
+        } else {
+            return "redirect:/writer/profile?userId=" + userId + "&errorMessage=" + result;
+        }
+    }
+
+    // Profile Photo Endpoints for Reader
+    @PostMapping("/reader/profile/photo/upload")
+    public String uploadReaderProfilePhoto(@RequestParam String userId,
+            @RequestParam("profilePhoto") org.springframework.web.multipart.MultipartFile photoFile,
+            Model model) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "redirect:/login";
+        }
+
+        if (photoFile == null || photoFile.isEmpty()) {
+            return "redirect:/reader/profile?userId=" + userId + "&errorMessage=Please select a photo to upload";
+        }
+
+        String result = userService.updateProfilePhoto(userId, photoFile);
+        if ("SUCCESS".equals(result)) {
+            return "redirect:/reader/profile?userId=" + userId + "&successMessage=Profile photo updated!";
+        } else {
+            return "redirect:/reader/profile?userId=" + userId + "&errorMessage=" + result;
+        }
+    }
+
+    @PostMapping("/reader/profile/photo/remove")
+    public String removeReaderProfilePhoto(@RequestParam String userId, Model model) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return "redirect:/login";
+        }
+
+        String result = userService.removeProfilePhoto(userId);
+        if ("SUCCESS".equals(result)) {
+            return "redirect:/reader/profile?userId=" + userId + "&successMessage=Profile photo removed!";
+        } else {
+            return "redirect:/reader/profile?userId=" + userId + "&errorMessage=" + result;
+        }
+    }
+}

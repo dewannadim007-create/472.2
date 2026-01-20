@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -55,15 +55,16 @@
             <form th:action="@{/writer/post/{postId}/edit(postId=${post.id})}" th:object="${createPostDTO}"
                 method="post">
                 <input type="hidden" name="userId" th:value="${userId}" />
-                <div class="form-group" style="margin-bottom: 15px;">
+
+                <div class="form-group" style="margin-bottom: 2rem;">
                     <label for="content" style="display: block; font-weight: bold; margin-bottom: 5px;">Content</label>
-                    <textarea id="content" th:field="*{content}" rows="10" required autofocus
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color); resize: vertical;"></textarea>
+                    <textarea id="content" th:field="*{content}" rows="15" required autofocus class="editor-title-input"
+                        style="width: 100%; resize: vertical; font-size: 1.1rem; font-weight: normal; line-height: 1.6; border-bottom: 1px solid var(--border-color);"></textarea>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn" style="flex: 1;">Save Changes</button>
-                    <a th:href="@{/writer/home(userId=${userId})}" class="btn btn-secondary"
-                        style="flex: 1; text-align: center;">Cancel</a>
+
+                <div class="form-actions">
+                    <a th:href="@{/writer/home(userId=${userId})}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn">Save Changes</button>
                 </div>
             </form>
         </div>

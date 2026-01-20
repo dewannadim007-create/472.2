@@ -18,6 +18,7 @@ public class User {
     private List<String> interests;
     private List<String> followingWriters;
     private List<String> followers;
+    private String profilePhotoUrl;
 
     public String getId() {
         return id;
@@ -83,10 +84,19 @@ public class User {
         this.followers = followers;
     }
 
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
+    }
+
     public User() {
     }
 
-    public User(String id, String username, String password, String name, String role, List<String> interests, List<String> followingWriters, List<String> followers) {
+    public User(String id, String username, String password, String name, String role, List<String> interests,
+            List<String> followingWriters, List<String> followers) {
         this.id = id;
         this.username = username;
         this.password = password;

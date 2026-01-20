@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Following - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
@@ -56,19 +56,22 @@
                     interests!</p>
             </div>
 
-            <div th:each="writer : ${followingWriters}" class="card"
-                style="background: var(--card-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h5 th:text="${writer.name}" style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Writer Name</h5>
-                    <small
-                        th:text="'Interests: ' + (${writer.interests != null and !writer.interests.isEmpty()} ? ${#strings.listJoin(writer.interests, ', ')} : 'No interests specified')"
-                        style="color: var(--text-secondary); display: block;">Interests: Java, Spring, etc.</small>
+            <div class="user-card-grid">
+                <div th:each="writer : ${followingWriters}" class="user-card">
+                    <div class="user-avatar" th:text="${#strings.substring(writer.name, 0, 1)}">W</div>
+                    <h3 th:text="${writer.name}" style="margin-bottom: 4px;">Writer Name</h3>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;"
+                        th:text="${writer.interests != null && !writer.interests.isEmpty() ? #strings.listJoin(writer.interests, ', ') : 'General'}">
+                        Interests</p>
+
+                    <div style="margin-top: auto; width: 100%; padding-top: var(--spacing-md);">
+                        <form th:action="@{/reader/unfollow/{writerId}(writerId=${writer.id})}" method="post">
+                            <input type="hidden" name="userId" th:value="${userId}" />
+                            <button type="submit" class="btn btn-secondary btn-sm"
+                                style="width: 100%; border-color: var(--border-color); color: var(--text-secondary);">Unfollow</button>
+                        </form>
+                    </div>
                 </div>
-                <form th:action="@{/reader/unfollow/{writerId}(writerId=${writer.username})}" method="post">
-                    <input type="hidden" name="userId" th:value="${userId}" />
-                    <button type="submit" class="btn btn-secondary btn-sm"
-                        style="color: #d93025; border-color: #d93025; border-radius: 999px;">Unfollow</button>
-                </form>
             </div>
         </div>
     </div>

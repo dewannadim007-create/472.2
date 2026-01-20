@@ -1,69 +1,61 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
-<body class="auth-theme">
-    <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
-        <p>Your daily dose of inspiration.</p>
-        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin-top: 1rem; cursor: pointer;">🌙</button>
-    </div>
 
-    <div class="container auth-container">
-        <div class="form-container">
-            <h2>Login</h2>
+<body class="reader-theme auth-page">
 
-            <div class="error-message" th:if="${param.error}">
-                Invalid username or password.
+    <div class="auth-container">
+        <img src="/images/FLICKER.png" alt="Flicker Logo" class="auth-logo">
+        <h2>Flicker</h2>
+        <p class="subtitle">Log in to your account</p>
+
+        <div class="error-message" th:if="${param.error}" style="text-align: center;">
+            Invalid username or password.
+        </div>
+        <div class="success-message" th:if="${param.logout}" style="text-align: center;">
+            You've been logged out.
+        </div>
+        <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}" style="text-align: center;"></div>
+
+        <form th:action="@{/login}" method="post"
+            style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
             </div>
-            <div class="success-message" th:if="${param.logout}">
-                You have been logged out.
-            </div>
-            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
-            <form th:action="@{/login}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required autofocus>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn" style="width: 100%;">Login</button>
-            </form>
-            <p style="text-align: center; margin-top: 1rem;">
-                Don't have an account? <a th:href="@{/register}">Register here</a>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn"
+                style="width: 100%; padding: 14px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; margin-top: var(--spacing-sm);">
+                Sign In
+            </button>
+        </form>
+
+        <div
+            style="text-align: center; margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
+            <p style="margin: 0; color: var(--text-2); font-size: 0.875rem;">
+                Don't have an account? <a th:href="@{/register}" class="auth-link">Join Flicker</a>
             </p>
         </div>
     </div>
 
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        
+    <script th:inline="javascript">
         const currentTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-        
-        function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
-        }
+        document.body.setAttribute('data-theme', currentTheme);
     </script>
 </body>
-</html> 
+
+</html>
