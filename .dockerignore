@@ -1,0 +1,14 @@
+.git
+.gitignore
+.vscode
+.idea
+**/target/
+**/build/
+flicker/target/
+flicker/.settings/
+flicker/.project/
+flicker/.classpath/
+uploads/
+flicker/uploads/
+*.log
+.mvn/wrapper/*.jar
