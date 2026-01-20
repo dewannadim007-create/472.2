@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Following - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
+
 <body class="reader-theme">
     <div class="header">
         <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
@@ -14,66 +16,82 @@
     </div>
 
     <div class="nav">
+        <div
+            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Feeds</div>
         <a th:href="@{/reader/home(userId=${userId})}">Home</a>
         <a th:href="@{/reader/following(userId=${userId})}" class="active">Following</a>
         <a th:href="@{/reader/suggestions(userId=${userId})}">Suggestions</a>
+
+        <div
+            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Account</div>
         <a th:href="@{/reader/profile(userId=${userId})}">Profile</a>
-        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
-        <a th:href="@{/logout}" class="logout-link">Logout</a>
+
+        <button id="theme-toggle">🌙</button>
+        <form th:action="@{/logout}" method="post" style="width: 100%;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="logout-link">Logout</button>
+        </form>
     </div>
 
     <div class="container">
-        <div style="margin-top: 2rem;">
-            <h2>Writers You Follow</h2>
-            <p>Here are the writers whose posts you'll see on your home feed.</p>
+        <div style="margin-top: 1rem; width: 100%;">
+            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Writers You Follow</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Here are the writers whose posts you'll see
+                on your home feed.</p>
 
-            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"></div>
-            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
-
-            <div th:if="${followingWriters.isEmpty()}">
-                <div class="card" style="text-align: center; padding: 2rem;">
-                    <h4>You aren't following any writers yet.</h4>
-                    <p>Check out the <a th:href="@{/reader/suggestions(userId=${userId})}">suggestions page</a> to find writers that match your interests!</p>
-                </div>
+            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"
+                style="background: #D4EDDA; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
+            </div>
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"
+                style="background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
             </div>
 
-            <div th:each="writer : ${followingWriters}" class="card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div th:if="${followingWriters.isEmpty()}"
+                style="background: var(--card-bg); padding: 2rem; border-radius: 4px; border: 1px solid var(--border-color); text-align: center;">
+                <h4>You aren't following any leaders yet.</h4>
+                <p>Check out the <a th:href="@{/reader/suggestions(userId=${userId})}"
+                        style="color: var(--accent-color);">suggestions page</a> to find writers that match your
+                    interests!</p>
+            </div>
+
+            <div th:each="writer : ${followingWriters}" class="card"
+                style="background: var(--card-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h5 th:text="${writer.name}" style="margin: 0 0 0.25rem 0;">Writer Name</h5>
-                    <small th:text="'Interests: ' + (${writer.interests != null and !writer.interests.isEmpty()} ? ${#strings.listJoin(writer.interests, ', ')} : 'No interests specified')" style="color: #6c757d;">Interests: Java, Spring, etc.</small>
+                    <h5 th:text="${writer.name}" style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Writer Name</h5>
+                    <small
+                        th:text="'Interests: ' + (${writer.interests != null and !writer.interests.isEmpty()} ? ${#strings.listJoin(writer.interests, ', ')} : 'No interests specified')"
+                        style="color: var(--text-secondary); display: block;">Interests: Java, Spring, etc.</small>
                 </div>
                 <form th:action="@{/reader/unfollow/{writerId}(writerId=${writer.username})}" method="post">
-                    <input type="hidden" name="userId" th:value="${userId}"/>
-                    <button type="submit" class="btn btn-danger btn-sm">Unfollow</button>
+                    <input type="hidden" name="userId" th:value="${userId}" />
+                    <button type="submit" class="btn btn-secondary btn-sm"
+                        style="color: #d93025; border-color: #d93025; border-radius: 999px;">Unfollow</button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        
-        // Check for saved theme preference or default to light theme
         const currentTheme = localStorage.getItem('theme') || 'light';
         body.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
-        
-        // Theme toggle click handler
+
         themeToggle.addEventListener('click', () => {
             const currentTheme = body.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
         });
-        
-        // Update theme icon
+
         function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
         }
     </script>
 </body>
+
 </html>

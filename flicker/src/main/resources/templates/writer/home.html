@@ -1,116 +1,138 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Posts - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
+
 <body class="writer-theme">
     <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
+                style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
         <p>Your daily dose of inspiration.</p>
     </div>
 
     <div class="nav">
-        <a th:href="@{/writer/home(userId=${userId})}" class="active">Home</a>
-        <a th:href="@{/writer/post/new(userId=${userId})}">New Post</a>
+        <div
+            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Studio</div>
+        <a th:href="@{/writer/home(userId=${userId})}" class="active">Dashboard</a>
+        <a th:href="@{/writer/post/new(userId=${userId})}">Create Post</a>
         <a th:href="@{/writer/followers(userId=${userId})}">Followers</a>
+
+        <div
+            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Account</div>
         <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
-        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">��</button>
-        <form th:action="@{/logout}" method="post" style="display: inline;">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button type="submit" class="logout-link" style="background: none; border: none; color: inherit; cursor: pointer; font: inherit; padding: 0; margin: 0;">Logout</button>
+
+        <button id="theme-toggle">🌙</button>
+        <form th:action="@{/logout}" method="post" style="width: 100%;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="logout-link">Logout</button>
         </form>
     </div>
 
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 1.5rem;">
-            <h2 style="margin: 0;">WELCOME, <strong th:text="${currentUser.name}">Writer</strong>!</h2>
+        <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0;">Welcome, <strong th:text="${currentUser.name}">Writer</strong>!</h2>
             <form th:action="@{/writer/home}" method="get" style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="hidden" name="userId" th:value="${userId}"/>
-                <label for="sortBy" class="sr-only">Sort by:</label>
-                <select name="sortBy" id="sortBy" class="form-control" onchange="this.form.submit();" style="min-width: 180px;">
-                    <option value="newest" th:selected="${#strings.isEmpty(sortBy) or #strings.equals(sortBy, 'newest')}">Newest First</option>
+                <input type="hidden" name="userId" th:value="${userId}" />
+                <select name="sortBy" id="sortBy" onchange="this.form.submit();" style="min-width: 150px;">
+                    <option value="newest"
+                        th:selected="${#strings.isEmpty(sortBy) or #strings.equals(sortBy, 'newest')}">Newest First
+                    </option>
                     <option value="oldest" th:selected="${#strings.equals(sortBy, 'oldest')}">Oldest First</option>
                     <option value="upvotes" th:selected="${#strings.equals(sortBy, 'upvotes')}">Most Upvoted</option>
-                    <option value="downvotes" th:selected="${#strings.equals(sortBy, 'downvotes')}">Most Downvoted</option>
-                    <option value="most-comments" th:selected="${#strings.equals(sortBy, 'most-comments')}">Most Commented</option>
                 </select>
             </form>
         </div>
 
-        <div style="margin-top: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>Your Posts</h2>
+        <div style="margin-top: 1rem; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Your Posts</h3>
                 <a th:href="@{/writer/post/new(userId=${userId})}" class="btn">Create New Post</a>
             </div>
 
-            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"></div>
-            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"
+                style="background: #D4EDDA; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
+            </div>
+            <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"
+                style="background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
+            </div>
 
-            <div th:if="${posts.isEmpty()}">
-                <div class="card" style="text-align: center; padding: 2rem;">
-                    <h4>You haven't written any posts yet.</h4>
-                    <p>Start sharing your thoughts with the world!</p>
-                    <a th:href="@{/writer/post/new(userId=${userId})}" class="btn" style="margin-top: 1rem;">Write Your First Post</a>
-                </div>
+            <div th:if="${posts.isEmpty()}"
+                style="text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px;">
+                <h4>You haven't written any posts yet.</h4>
+                <a th:href="@{/writer/post/new(userId=${userId})}" class="btn" style="margin-top: 1rem;">Write Your
+                    First Post</a>
             </div>
 
             <div th:each="post : ${posts}" class="post">
-                <div class="post-header">
-                    <small th:text="'Published on ' + ${#temporals.format(post.timestamp, 'dd-MMM-yyyy, hh:mm a')}">Date and Time</small>
-                </div>
-                <p th:text="${post.content}">Post content goes here.</p>
-                
-                <!-- Image Display Section -->
-                <div th:if="${post.imageUrl != null and !post.imageUrl.isEmpty()}" class="post-image" style="margin: 1rem 0;">
-                    <img th:src="${post.imageUrl}" th:alt="${post.imageCaption != null ? post.imageCaption : 'Post image'}" 
-                         style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <p th:if="${post.imageCaption != null and !post.imageCaption.isEmpty()}" 
-                       th:text="${post.imageCaption}" style="margin-top: 0.5rem; font-style: italic; color: #6c757d; font-size: 0.9rem;"></p>
-                </div>
-                
-                <div class="post-stats" style="margin: 1rem 0; font-size: 0.9rem; color: #6c757d; display: flex; gap: 1rem;">
-                    <span><strong th:text="${post.upvoteCount}">0</strong> Upvotes</span>
-                    <span><strong th:text="${post.downvoteCount}">0</strong> Downvotes</span>
-                    <span><strong th:text="${post.comments != null ? post.comments.size() : 0}">0</strong> Comments</span>
-                </div>
-                <div class="post-actions" style="border-bottom: 1px solid #e9ecef; padding-bottom: 1rem; margin-bottom: 1rem;">
-                    <a th:href="@{/writer/post/{postId}/edit(postId=${post.id}, userId=${userId})}" class="btn btn-secondary btn-sm">Edit Post</a>
-                    <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this post?');">
-                        <input type="hidden" name="userId" th:value="${userId}"/>
-                        <button type="submit" class="btn btn-danger btn-sm">Delete Post</button>
-                    </form>
+                <!-- Left Sidebar: Stats -->
+                <div class="post-actions" style="width: 60px;">
+                    <div style="text-align: center; margin-bottom: 8px;">
+                        <span style="display: block; font-size: 1.2rem;">⬆️</span>
+                        <small th:text="${post.upvoteCount}">0</small>
+                    </div>
+                    <div style="text-align: center;">
+                        <span style="display: block; font-size: 1.2rem;">⬇️</span>
+                        <small th:text="${post.downvoteCount}">0</small>
+                    </div>
                 </div>
 
-                <!-- Comments Section for Writer -->
-                <div class="comments-section">
-                    <h5 style="margin-bottom: 1rem;">Reader Comments</h5>
-                    <div th:if="${post.comments == null or post.comments.isEmpty()}">
-                        <p style="color: #6c757d; font-size: 0.9rem;">No comments yet.</p>
+                <!-- Right Content -->
+                <div class="post-wrapper">
+                    <div class="post-header">
+                        <small
+                            th:text="'Published: ' + ${#temporals.format(post.timestamp, 'MMM dd, yyyy, hh:mm a')}">Date</small>
                     </div>
-                    <div th:each="comment : ${post.comments}" class="comment">
-                        <p th:text="${comment.content}">Comment text.</p>
-                        <small th:text="'by ' + ${comment.authorName} + ' on ' + ${#temporals.format(comment.timestamp, 'dd-MMM-yyyy, hh:mm a')}">Commenter and Date</small>
-                        <div class="comment-actions">
-                            <div class="comment-voting" style="display: flex; align-items: center; gap: 0.5rem;">
-                                <button class="btn btn-success btn-xs" disabled>⬆️ (<span th:text="${comment.upvoteCount}">0</span>)</button>
-                                <button class="btn btn-danger btn-xs" disabled>⬇️ (<span th:text="${comment.downvoteCount}">0</span>)</button>
-                            </div>
+
+                    <p th:text="${post.content}" style="margin-bottom: 10px;">Content</p>
+
+                    <div th:if="${post.imageUrl != null and !post.imageUrl.isEmpty()}" class="post-image"
+                        style="margin-bottom: 10px;">
+                        <img th:src="${post.imageUrl}" th:alt="${post.imageCaption}">
+                    </div>
+
+                    <div
+                        style="display: flex; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <a th:href="@{/writer/post/{postId}/edit(postId=${post.id}, userId=${userId})}"
+                            class="btn btn-secondary btn-xs" style="border-radius: 4px;">Edit</a>
+                        <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post"
+                            style="display:inline;" onsubmit="return confirm('Delete this post?');">
+                            <input type="hidden" name="userId" th:value="${userId}" />
+                            <button type="submit" class="btn btn-secondary btn-xs"
+                                style="color: #d93025; border-color: #d93025; border-radius: 4px;">Delete</button>
+                        </form>
+                        <span style="margin-left: auto; color: var(--text-secondary); font-size: 0.9rem;">💬 <span
+                                th:text="${post.comments != null ? post.comments.size() : 0}">0</span> Comments</span>
+                    </div>
+
+                    <!-- Comments Section (Collapsed/Simple for Writer to view) -->
+                    <div class="comments-section" th:if="${post.comments != null and !post.comments.isEmpty()}">
+                        <h5 style="margin: 0 0 10px 0;">Recent Comments</h5>
+                        <div th:each="comment, iterStat : ${post.comments}" th:if="${iterStat.index < 3}"
+                            class="comment">
+                            <small><strong th:text="${comment.authorName}">User</strong>: <span
+                                    th:text="${comment.content}">Content</span></small>
+                        </div>
+                        <div th:if="${post.comments.size() > 3}" style="text-align: center; margin-top: 5px;">
+                            <small style="color: var(--primary-color); cursor: pointer;">View all comments</small>
                         </div>
                     </div>
 
-                    <!-- Add Comment Form for Writer to Reply -->
-                    <div class="add-comment-form" style="margin-top: 1.5rem;">
-                        <form th:action="@{/comment/create}" method="post">
-                            <input type="hidden" name="postId" th:value="${post.id}"/>
-                            <input type="hidden" name="userId" th:value="${userId}"/>
-                            <div class="form-group">
-                                <textarea name="content" class="form-control comment-textarea" rows="1" placeholder="Write a reply..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-sm">Reply to Readers</button>
+                    <!-- Reply Box -->
+                    <div class="add-comment-form" style="margin-top: 10px;">
+                        <form th:action="@{/comment/create}" method="post" style="display: flex; gap: 8px;">
+                            <input type="hidden" name="postId" th:value="${post.id}" />
+                            <input type="hidden" name="userId" th:value="${userId}" />
+                            <input type="text" name="content" placeholder="Reply as author..."
+                                style="flex: 1; font-size: 0.9rem;">
+                            <button type="submit" class="btn btn-sm">Reply</button>
                         </form>
                     </div>
                 </div>
@@ -119,29 +141,24 @@
     </div>
 
     <script>
-        // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        
-        // Check for saved theme preference or default to light theme
-        const currentTheme = localStorage.getItem('theme') || 'light';
+        const currentTheme = localStorage.getItem('theme') || 'light'; // Default to light even for writer, let them toggle
         body.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
-        
-        // Theme toggle click handler
+
         themeToggle.addEventListener('click', () => {
             const currentTheme = body.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
         });
-        
-        // Update theme icon
+
         function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
         }
     </script>
 </body>
-</html> 
+
+</html>

@@ -1,70 +1,81 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Followers - Flicker</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/reddit-style.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
+
 <body class="writer-theme">
     <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
+                style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
         <p>Your daily dose of inspiration.</p>
     </div>
 
     <div class="nav">
-        <a th:href="@{/writer/home(userId=${userId})}">My Posts</a>
-        <a th:href="@{/writer/post/new(userId=${userId})}">New Post</a>
+        <div
+            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Studio</div>
+        <a th:href="@{/writer/home(userId=${userId})}">Dashboard</a>
+        <a th:href="@{/writer/post/new(userId=${userId})}">Create Post</a>
         <a th:href="@{/writer/followers(userId=${userId})}" class="active">Followers</a>
+
+        <div
+            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+            Account</div>
         <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
-        <button id="theme-toggle" class="btn btn-secondary btn-sm" style="margin: 0 1rem; cursor: pointer;">🌙</button>
-        <a th:href="@{/logout}" class="logout-link">Logout</a>
+
+        <button id="theme-toggle">🌙</button>
+        <form th:action="@{/logout}" method="post" style="width: 100%;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="logout-link">Logout</button>
+        </form>
     </div>
 
     <div class="container">
-        <div style="margin-top: 2rem;">
-            <h2>Your Followers</h2>
-            <p>Here is a list of readers who follow you.</p>
+        <div style="margin-top: 1rem; width: 100%;">
+            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Your Followers</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Here is a list of readers who follow you.
+            </p>
 
-            <div th:if="${followers.isEmpty()}">
-                <div class="card" style="text-align: center; padding: 2rem;">
-                    <h4>You don't have any followers yet.</h4>
-                    <p>Keep writing great content to attract followers!</p>
-                </div>
+            <div th:if="${followers.isEmpty()}"
+                style="background: var(--card-bg); padding: 2rem; border-radius: 4px; border: 1px solid var(--border-color); text-align: center;">
+                <h4>You don't have any followers yet.</h4>
+                <p>Keep writing great content to attract followers!</p>
             </div>
 
-            <div th:each="follower : ${followers}" class="card" style="margin-bottom: 1rem;">
-                <h5 th:text="${follower.name}">Follower Name</h5>
-                <p th:text="'@' + ${follower.username}" style="color: #6c757d; margin-bottom: 0;">@username</p>
+            <div th:each="follower : ${followers}" class="card"
+                style="background: var(--card-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 1rem;">
+                <h5 th:text="${follower.name}" style="margin: 0;">Follower Name</h5>
+                <p th:text="'@' + ${follower.username}"
+                    style="margin: 0.25rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">@username</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        
-        // Check for saved theme preference or default to light theme
         const currentTheme = localStorage.getItem('theme') || 'light';
         body.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
-        
-        // Theme toggle click handler
+
         themeToggle.addEventListener('click', () => {
             const currentTheme = body.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
         });
-        
-        // Update theme icon
+
         function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
         }
     </script>
 </body>
-</html> 
+
+</html>

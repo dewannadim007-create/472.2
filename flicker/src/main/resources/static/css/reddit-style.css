@@ -1,0 +1,345 @@
+/* Reddit-Style Design System */
+
+/* Global Variables and Theming */
+:root {
+    /* Dimensions */
+    --header-height: 50px;
+    --sidebar-width: 270px;
+    
+    /* Common Colors */
+    --text-primary: #1a1a1b;
+    --text-secondary: #7c7c7c;
+    --border-color: #ccc;
+    --body-bg: #DAE0E6;
+    --card-bg: #FFFFFF;
+    --hover-bg: #e2e7eb;
+}
+
+/* Reader Theme (Consumer - Reddit Vibe) */
+body.reader-theme {
+    --primary-color: #FF4500; /* Reddit Orange */
+    --accent-color: #0079D3; /* Reddit Blue */
+    --theme-bg: #DAE0E6;
+}
+
+body[data-theme="dark"].reader-theme {
+    --text-primary: #D7DADC;
+    --text-secondary: #818384;
+    --border-color: #343536;
+    --body-bg: #030303;
+    --card-bg: #1A1A1B;
+    --hover-bg: #272729;
+    --primary-color: #FF4500;
+}
+
+/* Writer Theme (Creator - Studio Vibe) */
+body.writer-theme {
+    --primary-color: #6200EA; /* Deep Purple */
+    --accent-color: #00BFA5; /* Teal */
+    --theme-bg: #F0F2F5; /* Softer Gray */
+    --body-bg: #F3F4F6;
+}
+
+body[data-theme="dark"].writer-theme {
+    --text-primary: #ECEFF1;
+    --text-secondary: #90A4AE;
+    --border-color: #37474F;
+    --body-bg: #121212; /* Deep Dark */
+    --card-bg: #1E1E1E;
+    --hover-bg: #2C2C2C;
+    --primary-color: #7C4DFF;
+}
+
+/* layout Reset */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    
+    /* Grid Layout */
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "sidebar content";
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: var(--header-height) calc(100vh - var(--header-height));
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- Header / Top Bar --- */
+.header {
+    grid-area: header;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+}
+
+.header-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.header p {
+    margin: 0 0 0 15px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: none; /* Hide slogan on small screens or just hide it for cleaner look */
+}
+@media (min-width: 768px) {
+    .header p { display: block; }
+}
+
+/* --- Left Sidebar (Navigation) --- */
+.nav {
+    grid-area: sidebar;
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+
+.nav a, .nav button.logout-link {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.nav a:hover, .nav button.logout-link:hover {
+    background-color: var(--hover-bg);
+}
+
+.nav a.active {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+    font-weight: 700;
+    border-left: 4px solid var(--primary-color); /* Added active indicator */
+}
+
+/* Theme Toggle Button in Sidebar */
+#theme-toggle {
+    margin-top: auto; /* Push to bottom */
+    margin-bottom: 10px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 20px;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* --- Main Content Area --- */
+.container {
+    grid-area: content;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: var(--body-bg);
+    
+    /* Center content max-width like Reddit */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container > * {
+    width: 100%;
+    max-width: 740px; /* Standard Reddit post width */
+}
+
+/* --- Components --- */
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 6px 16px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 999px; /* Pill shape */
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: white;
+    background-color: var(--primary-color);
+}
+.btn:hover {
+    filter: brightness(1.1);
+}
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--text-secondary);
+}
+.btn-secondary:hover {
+    background-color: var(--hover-bg);
+}
+
+.btn-sm, .btn-xs {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* Post Card */
+.post {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 0; /* Reset padding for internal layout */
+    display: flex;
+    flex-direction: row; /* Vote sidebar + Content */
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+.post:hover {
+    border-color: #898989;
+}
+
+/* Vote Sidebar inside Post */
+.post-actions {
+    width: 40px;
+    background-color: var(--body-bg); /* Slightly different bg for vote column */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-right: 1px solid transparent; /* Or subtle border */
+}
+.reader-theme .post-actions {
+    background-color: rgba(0,0,0,0.03);
+}
+[data-theme="dark"] .post-actions {
+    background-color: rgba(255,255,255,0.03);
+}
+
+.post-wrapper {
+    flex: 1;
+    padding: 8px 16px;
+}
+
+/* Post Header */
+.post-header {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.post-header strong {
+    color: var(--text-primary);
+    margin-right: 4px;
+}
+
+/* Content */
+.post p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+/* Images */
+.post-image img {
+    border-radius: 4px;
+    max-height: 512px !important;
+    object-fit: contain;
+    background-color: black;
+    width: 100%;
+}
+
+/* Comments Section */
+.comments-section {
+    background-color: var(--bg-color);
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+}
+.comment {
+    padding: 8px 12px;
+    background-color: var(--hover-bg);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* Forms and Inputs */
+input, textarea, select {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Welcome Area */
+.welcome-header {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        grid-template-areas:
+            "header"
+            "content"
+            "sidebar"; /* Move sidebar to bottom nav or hidden menu */
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--header-height) 1fr 60px;
+    }
+    
+    .nav {
+        flex-direction: row;
+        justify-content: space-around;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        padding: 5px;
+        align-items: center;
+    }
+    
+    .nav a {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        text-align: center;
+        width: auto;
+    }
+    
+    .header p { display: none; }
+}
+
