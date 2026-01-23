@@ -16,16 +16,12 @@
     </div>
 
     <div class="nav">
-        <div
-            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Feeds</div>
+        <div class="section-header">Feeds</div>
         <a th:href="@{/reader/home(userId=${userId})}">Home</a>
         <a th:href="@{/reader/following(userId=${userId})}">Following</a>
         <a th:href="@{/reader/suggestions(userId=${userId})}">Suggestions</a>
 
-        <div
-            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Account</div>
+        <div class="section-header">Account</div>
         <a th:href="@{/reader/profile(userId=${userId})}" class="active">Profile</a>
 
         <button id="theme-toggle">🌙</button>
@@ -36,14 +32,9 @@
     </div>
 
     <div class="container">
-        <div class="form-container"
-            style="margin-top: 1rem; background: var(--card-bg); padding: 20px; border-radius: 4px; border: 1px solid var(--border-color);">
-            <div class="success-message" th:if="${param.successMessage}" th:text="${param.successMessage}"
-                style="background: #D4EDDA; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
-            </div>
-            <div class="error-message" th:if="${param.errorMessage}" th:text="${param.errorMessage}"
-                style="background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
-            </div>
+        <div class="form-container" style="width: 100%; margin-top: 0;">
+            <div class="success-message" th:if="${param.successMessage}" th:text="${param.successMessage}"></div>
+            <div class="error-message" th:if="${param.errorMessage}" th:text="${param.errorMessage}"></div>
 
             <!-- Profile View Mode -->
             <div th:unless="${profileEditDTO}" style="width: 100%;">
@@ -55,6 +46,7 @@
                                 th:if="${currentUser.profilePhotoUrl == null || currentUser.profilePhotoUrl.isEmpty()}"
                                 th:text="${#strings.substring(currentUser.name, 0, 1)}">U
                             </div>
+                            <!-- Note: Profile photo upload is disabled, so this is just for display if URL exists -->
                             <img th:if="${currentUser.profilePhotoUrl != null && !currentUser.profilePhotoUrl.isEmpty()}"
                                 th:src="${currentUser.profilePhotoUrl}" alt="Profile Photo"
                                 style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
@@ -63,9 +55,7 @@
                             <h2 th:text="${currentUser.name}">User Name</h2>
                             <p th:text="'@' + ${currentUser.username}">@username</p>
                             <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <span class="badge"
-                                    style="background: var(--bg-hover); padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; font-weight: 600;"
-                                    th:text="${currentUser.role}">Role</span>
+                                <span class="badge" th:text="${currentUser.role}">Role</span>
                             </div>
                         </div>
                         <div style="margin-left: auto; margin-top: 1rem;">
@@ -76,17 +66,16 @@
                 </div>
 
                 <div style="margin-top: 2rem;">
-                    <h3
-                        style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                    <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
                         About</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                        <div class="card" style="padding: 1rem;">
-                            <h5 style="margin-top: 0; color: var(--text-secondary);">Interests</h5>
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        <div class="card" style="padding: 1rem; box-shadow: none; border: 1px solid var(--border);">
+                            <h5 style="margin: 0 0 1rem 0; color: var(--text-2);">Interests</h5>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                                 <span th:each="interest : ${currentUser.interests}" th:text="${interest}"
-                                    style="background: var(--bg-hover); padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">Interest</span>
+                                    style="background: var(--bg-hover); padding: 4px 12px; border-radius: 16px; font-size: 0.9rem; color: var(--text-1); border: 1px solid var(--border);">Interest</span>
                                 <span th:if="${currentUser.interests == null || currentUser.interests.isEmpty()}"
-                                    style="color: var(--text-tertiary); font-style: italic;">No interests added
+                                    style="color: var(--text-3); font-style: italic;">No interests added
                                     yet.</span>
                             </div>
                         </div>
@@ -96,141 +85,63 @@
 
             <!-- Profile Edit Mode -->
             <div th:if="${profileEditDTO}">
-                <h2 style="margin-top: 0;">Edit Profile</h2>
-                <p>Keep your profile information up to date.</p>
-
+                <div class="welcome-header" style="text-align: left; margin-bottom: var(--spacing-lg);">
+                    <h2 style="margin: 0;">Edit Profile</h2>
+                    <p style="color: var(--text-2); margin: 0;">Keep your profile information up to date.</p>
+                </div>
 
                 <form th:action="@{/reader/profile/edit}" th:object="${profileEditDTO}" method="post">
                     <input type="hidden" name="userId" th:value="${userId}" />
 
-
-
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="username"
-                            style="display: block; font-weight: bold; margin-bottom: 5px;">Username</label>
+                    <div class="form-group">
+                        <label for="username">Username</label>
                         <input type="text" id="username" th:field="*{username}" readonly
-                            style="background: var(--hover-bg);">
-                        <small style="color: var(--text-secondary);">Usernames cannot be changed.</small>
+                            style="background: var(--bg-hover); color: var(--text-2); cursor: not-allowed;">
+                        <small style="color: var(--text-3);">Usernames cannot be changed.</small>
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="name" style="display: block; font-weight: bold; margin-bottom: 5px;">Full
-                            Name</label>
+
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
                         <input type="text" id="name" th:field="*{name}">
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="password" style="display: block; font-weight: bold; margin-bottom: 5px;">New
-                            Password (leave blank to keep current)</label>
-                        <input type="password" id="password" th:field="*{password}" placeholder="Enter new password">
-                        <small style="color: var(--text-secondary);">Leave blank to keep your current password</small>
+
+                    <div class="form-group">
+                        <label for="password">New Password</label>
+                        <input type="password" id="password" th:field="*{password}"
+                            placeholder="Enter new password (optional)">
+                        <small style="color: var(--text-3);">Leave blank to keep your current password</small>
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="confirmPassword"
-                            style="display: block; font-weight: bold; margin-bottom: 5px;">Confirm New Password</label>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
                         <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
                             placeholder="Confirm new password" oninput="checkPasswordMatch()">
-                        <small id="passwordMatchMessage" style="color: var(--text-secondary);">Please confirm your new
+                        <small id="passwordMatchMessage" style="color: var(--text-3);">Please confirm your new
                             password</small>
                     </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Interests</label>
-                        <div class="interests-checkboxes"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
-                            <!-- Checkboxes logic remains same, just ensuring container styles apply -->
+
+                    <div class="form-group">
+                        <label>Interests</label>
+                        <div class="interests-grid"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px;">
                             <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="technology"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('technology')}">
-                                Technology
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="science"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('science')}">
-                                Science
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="art"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('art')}">
-                                Art
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="music"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('music')}">
-                                Music
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="sports"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('sports')}">
-                                Sports
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="travel"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('travel')}">
-                                Travel
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="food"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('food')}">
-                                Food
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="fashion"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('fashion')}">
-                                Fashion
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="health"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('health')}">
-                                Health
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="education"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('education')}">
-                                Education
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="business"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('business')}">
-                                Business
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="gaming"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('gaming')}">
-                                Gaming
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="books"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('books')}">
-                                Books
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="photography"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('photography')}">
-                                Photography
-                            </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem; cursor: pointer;">
-                                <input type="checkbox" name="selectedInterests" value="design"
-                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains('design')}">
-                                Design
+                                th:each="interest : ${{'technology', 'science', 'art', 'music', 'sports', 'travel', 'food', 'fashion', 'health', 'education', 'business', 'gaming', 'books', 'photography', 'design'}}"
+                                style="display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s;"
+                                onmouseover="this.style.background='var(--bg-hover)'"
+                                onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" name="selectedInterests" th:value="${interest}"
+                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains(interest)}">
+                                <span th:text="${#strings.capitalize(interest)}">Interest</span>
                             </label>
                         </div>
-                        <small style="color: var(--text-secondary);">Select all your interests</small>
+                        <small style="color: var(--text-3); display: block; margin-top: 8px;">Select all your
+                            interests</small>
                     </div>
-                    <button type="submit" class="btn">Save Changes</button>
-                    <a th:href="@{/reader/profile(userId=${userId})}" class="btn btn-secondary">Cancel</a>
+
+                    <div class="form-actions">
+                        <a th:href="@{/reader/profile(userId=${userId})}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn">Save Changes</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -244,35 +155,32 @@
 
             if (password === '' && confirmPassword === '') {
                 message.textContent = 'Please confirm your new password';
-                message.style.color = 'var(--text-secondary)';
+                message.style.color = 'var(--text-3)';
                 return;
             }
 
             if (confirmPassword === '') {
                 message.textContent = 'Please confirm your new password';
-                message.style.color = 'var(--text-secondary)';
+                message.style.color = 'var(--text-3)';
                 return;
             }
 
             if (password === confirmPassword) {
                 message.textContent = 'Passwords match!';
-                message.style.color = '#198754';
+                message.style.color = 'var(--success)';
             } else {
                 message.textContent = 'Passwords do not match';
-                message.style.color = '#dc3545';
+                message.style.color = 'var(--danger)';
             }
         }
 
         // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-
-        // Check for saved theme preference or default to light theme
         const currentTheme = localStorage.getItem('theme') || 'light';
         body.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
 
-        // Theme toggle click handler
         themeToggle.addEventListener('click', () => {
             const currentTheme = body.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -282,7 +190,6 @@
             updateThemeIcon(newTheme);
         });
 
-        // Update theme icon
         function updateThemeIcon(theme) {
             themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
         }

@@ -18,16 +18,12 @@
     </div>
 
     <div class="nav">
-        <div
-            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Studio</div>
+        <div class="section-header">Studio</div>
         <a th:href="@{/writer/home(userId=${userId})}" class="active">Dashboard</a>
         <a th:href="@{/writer/post/new(userId=${userId})}">Create Post</a>
         <a th:href="@{/writer/followers(userId=${userId})}">Followers</a>
 
-        <div
-            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Account</div>
+        <div class="section-header">Account</div>
         <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
 
         <button id="theme-toggle">🌙</button>
@@ -39,10 +35,10 @@
 
     <div class="container">
         <div class="welcome-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); width: 100%;">
             <div>
-                <h2 style="margin: 0;">Dashboard</h2>
-                <p style="margin: 0; color: var(--text-secondary);">Welcome back, <strong
+                <h2 style="margin: 0; font-weight: 800;">Dashboard</h2>
+                <p style="margin: 0; color: var(--text-2);">Welcome back, <strong
                         th:text="${currentUser.name}">Writer</strong>.</p>
             </div>
             <a th:href="@{/writer/post/new(userId=${userId})}" class="btn">Create New Post</a>
@@ -67,11 +63,10 @@
 
         <div style="width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3>Your Recent Posts</h3>
+                <h3 style="margin: 0;">Your Recent Posts</h3>
                 <form th:action="@{/writer/home}" method="get" style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="hidden" name="userId" th:value="${userId}" />
-                    <select name="sortBy" id="sortBy" onchange="this.form.submit();"
-                        style="min-width: 150px; padding: 6px;">
+                    <select name="sortBy" id="sortBy" onchange="this.form.submit();" style="min-width: 150px;">
                         <option value="newest"
                             th:selected="${#strings.isEmpty(sortBy) or #strings.equals(sortBy, 'newest')}">Newest First
                         </option>
@@ -86,48 +81,63 @@
             <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
             <div th:if="${posts.isEmpty()}"
-                style="text-align: center; padding: 3rem; background: var(--card-bg); border-radius: 8px; border: 1px dashed var(--border-color);">
+                style="text-align: center; padding: 3rem; background: var(--bg-card); border-radius: var(--radius); border: 1px dashed var(--border);">
                 <h4>You haven't written any posts yet.</h4>
-                <p style="color: var(--text-secondary);">Start sharing your ideas with the world.</p>
+                <p style="color: var(--text-2);">Start sharing your ideas with the world.</p>
                 <a th:href="@{/writer/post/new(userId=${userId})}" class="btn" style="margin-top: 1rem;">Write Your
                     First Post</a>
             </div>
 
-            <div th:each="post : ${posts}" class="postWriter"
-                style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1rem; padding: 16px; display: flex; gap: 1rem; align-items: flex-start;">
-                <!-- Analytics Sidebar -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; min-width: 50px; padding-right: 1rem; border-right: 1px solid var(--border-color);">
-                    <span style="font-size: 1.2rem; color: var(--primary-color); font-weight: bold;"
-                        th:text="${post.upvoteCount - post.downvoteCount}">0</span>
-                    <small
-                        style="color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase;">Score</small>
+            <!-- Post List for Writer -->
+            <div th:each="post : ${posts}" class="post" style="padding: 0; overflow: hidden;">
+                <!-- Internal Analytics Sidebar -->
+                <div class="post-actions"
+                    style="width: 80px; padding: var(--spacing-md); border-right: 1px solid var(--border);">
+                    <div style="text-align: center;">
+                        <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary);"
+                            th:text="${post.upvoteCount - post.downvoteCount}">0</span>
+                        <span
+                            style="display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--text-3); margin-top: 4px;">Score</span>
+                    </div>
                 </div>
 
-                <!-- Content -->
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <small style="color: var(--text-secondary);"
+                <!-- Post Content -->
+                <div class="post-wrapper">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                        <small style="color: var(--text-3); font-weight: 500;"
                             th:text="${#temporals.format(post.timestamp, 'MMM dd, yyyy')}">Date</small>
-                        <div style="display: flex; gap: 4px;">
+                        <div style="display: flex; gap: 8px;">
                             <a th:href="@{/writer/post/{postId}/edit(postId=${post.id}, userId=${userId})}"
-                                class="btn btn-link">Edit</a>
+                                class="btn btn-sm btn-secondary">Edit</a>
                             <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post"
                                 style="display:inline;" onsubmit="return confirm('Delete this post?');">
                                 <input type="hidden" name="userId" th:value="${userId}" />
-                                <button type="submit" class="btn btn-link text-danger">Delete</button>
+                                <button type="submit" class="btn btn-sm btn-danger-outline">Delete</button>
                             </form>
                         </div>
                     </div>
 
-                    <div style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-primary); max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;"
+                    <div style="font-size: 1rem; margin-bottom: var(--spacing-md); color: var(--text-1); max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;"
                         th:text="${post.content}">Content Preview</div>
 
                     <div
-                        style="display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
-                        <span>💬 <span th:text="${post.comments != null ? post.comments.size() : 0}">0</span>
-                            comments</span>
-                        <span th:if="${post.imageUrl != null}">📷 Has Image</span>
+                        style="display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-3);">
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                </path>
+                            </svg>
+                            <span th:text="${post.comments != null ? post.comments.size() : 0}">0</span> comments
+                        </span>
+                        <span th:if="${post.imageUrl != null}" style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            Has Image
+                        </span>
                     </div>
                 </div>
             </div>
