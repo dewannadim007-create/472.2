@@ -78,9 +78,17 @@ flicker/
 
 Configure the following environment variables for deployment:
 
+**Required:**
 - `MONGODB_URI`: MongoDB connection string
+
+**Optional:**
 - `PORT`: Server port (default: 8080)
 - `UPLOAD_DIR`: Directory for file uploads (default: /tmp/uploads)
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name (for image uploads)
+- `CLOUDINARY_API_KEY`: Cloudinary API key (for image uploads)
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret (for image uploads)
+
+**Note**: The application will start without Cloudinary credentials, but image upload features will not work until these are configured.
 
 ## Deployment
 

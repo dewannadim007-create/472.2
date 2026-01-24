@@ -75,17 +75,28 @@ Fill in the following settings:
 
 Click **"Advanced"** → **"Add Environment Variable"** and add:
 
+**Required Variables:**
+
 | Key | Value |
 |-----|-------|
 | `MONGODB_URI` | Your MongoDB Atlas connection string |
-| `PORT` | `10000` (Render's default) |
-| `UPLOAD_DIR` | `/tmp/uploads` |
-| `OPENAI_API_KEY` | Your OpenAI API key (if using AI features) |
+
+**Optional Variables:**
+
+| Key | Value | Purpose |
+|-----|-------|---------|
+| `PORT` | `10000` | Server port (Render sets this automatically) |
+| `UPLOAD_DIR` | `/tmp/uploads` | Directory for temporary uploads |
+| `CLOUDINARY_CLOUD_NAME` | Your Cloudinary cloud name | Image upload service (if using image features) |
+| `CLOUDINARY_API_KEY` | Your Cloudinary API key | Image upload service (if using image features) |
+| `CLOUDINARY_API_SECRET` | Your Cloudinary API secret | Image upload service (if using image features) |
 
 **Example MONGODB_URI**:
 ```
 mongodb+srv://your-username:your-new-password@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority
 ```
+
+**Note**: The application will start without Cloudinary credentials, but image upload features will not work until these are configured.
 
 ### 3.4 Deploy
 
