@@ -26,15 +26,26 @@ public class FileUploadService {
 
     @PostConstruct
     public void init() {
-        cloudinary = new Cloudinary(ObjectUtils.asMap(
-                "cloud_name", cloudName,
-                "api_key", apiKey,
-                "api_secret", apiSecret));
+        // Only initialize Cloudinary if credentials are provided
+        if (cloudName != null && !cloudName.isEmpty() && 
+            apiKey != null && !apiKey.isEmpty() && 
+            apiSecret != null && !apiSecret.isEmpty()) {
+            cloudinary = new Cloudinary(ObjectUtils.asMap(
+                    "cloud_name", cloudName,
+                    "api_key", apiKey,
+                    "api_secret", apiSecret));
+        } else {
+            System.err.println("WARNING: Cloudinary credentials not configured. Image upload features will not work.");
+        }
     }
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     public String uploadImage(MultipartFile file) throws IOException {
+        if (cloudinary == null) {
+            throw new IllegalStateException("Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.");
+        }
+        
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty or null");
         }
@@ -55,6 +66,11 @@ public class FileUploadService {
     }
 
     public boolean deleteImage(String imageUrl) {
+        if (cloudinary == null) {
+            System.err.println("WARNING: Cloudinary is not configured. Cannot delete image.");
+            return false;
+        }
+        
         if (imageUrl == null || imageUrl.isEmpty()) {
             return false;
         }
