@@ -21,7 +21,7 @@ Caused by: javax.naming.NameNotFoundException: DNS name not found [response code
 
 **Before:**
 ```properties
-spring.data.mongodb.uri=mongodb+srv://PulseAdmin:iZ6X8Wdbk4iO8KHS@pulse-cluster.tmwyu.mongodb.net/flicker?retryWrites=true&w=majority&appName=Pulse-Cluster
+spring.data.mongodb.uri=mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/flicker?retryWrites=true&w=majority&appName=Pulse-Cluster
 server.port=8080
 app.upload.dir=uploads
 ```
@@ -49,11 +49,11 @@ app.upload.dir=${UPLOAD_DIR:uploads}
 
 ### CRITICAL: Update Your MongoDB Password
 
-Since your credentials were exposed in the code, you MUST:
+Since credentials may have been previously exposed in the code, you SHOULD:
 
 1. **Go to MongoDB Atlas** (https://cloud.mongodb.com)
 2. Navigate to **Database Access**
-3. Edit your user (`PulseAdmin`) and **set a NEW password**
+3. Edit your database user and **set a NEW password**
 4. Save the new password securely
 
 ### Set Environment Variables in Render
@@ -65,7 +65,7 @@ Since your credentials were exposed in the code, you MUST:
 
 | Variable Name | Example Value | Notes |
 |---------------|---------------|-------|
-| `MONGODB_URI` | `mongodb+srv://PulseAdmin:YOUR_NEW_PASSWORD@pulse-cluster.tmwyu.mongodb.net/flicker?retryWrites=true&w=majority` | Use your NEW password, database name is 'flicker' (lowercase) |
+| `MONGODB_URI` | `mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/flicker?retryWrites=true&w=majority` | Use your MongoDB Atlas credentials, database name is 'flicker' (lowercase) |
 | `PORT` | `10000` | Render sets this automatically |
 | `UPLOAD_DIR` | `/tmp/uploads` | For file uploads in cloud |
 | `CLOUDINARY_CLOUD_NAME` | Your value | If using Cloudinary |
