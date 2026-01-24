@@ -56,10 +56,15 @@ flicker/
    ```
 
 2. Configure MongoDB connection:
-   - Copy `.env.example` to `.env`
-   - Update the MongoDB connection string in `application.properties` or set environment variable:
+   - The application uses the `MONGODB_URI` environment variable for MongoDB connection
+   - For local development with MongoDB running locally:
+     ```bash
+     export MONGODB_URI=mongodb://localhost:27017/flicker
      ```
-     MONGODB_URI=mongodb://localhost:27017/FLICKER
+   - Or simply run without setting the variable (defaults to `mongodb://localhost:27017/flicker`)
+   - For MongoDB Atlas or remote MongoDB, set the full connection string:
+     ```bash
+     export MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/flicker?retryWrites=true&w=majority
      ```
 
 3. Build the project:
@@ -78,9 +83,14 @@ flicker/
 
 Configure the following environment variables for deployment:
 
-- `MONGODB_URI`: MongoDB connection string
-- `PORT`: Server port (default: 8080)
-- `UPLOAD_DIR`: Directory for file uploads (default: /tmp/uploads)
+- `MONGODB_URI`: MongoDB connection string (default: `mongodb://localhost:27017/flicker`)
+- `PORT`: Server port (default: `8080`)
+- `UPLOAD_DIR`: Directory for file uploads (default: `uploads`)
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name (required for image uploads)
+- `CLOUDINARY_API_KEY`: Cloudinary API key (required for image uploads)
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret (required for image uploads)
+
+**Note**: The application will use default values for local development if environment variables are not set.
 
 ## Deployment
 

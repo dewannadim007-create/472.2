@@ -17,25 +17,28 @@ This guide will help you deploy the Flicker Spring Boot application to Render.co
 4. Go to **Network Access** → Add IP Address → **Allow Access from Anywhere** (0.0.0.0/0)
 5. Go to **Database** → **Connect** → **Connect your application**
 6. Copy your connection string (looks like: `mongodb+srv://username:password@cluster.mongodb.net/`)
-7. Replace `<password>` with your actual password
-8. Add `/FLICKER` before the `?` to specify the database name
+7. Replace `<password>` with your actual password and URL encode special characters
+8. Add `/flicker` before the `?` to specify the database name
+9. Do NOT include the `appName` parameter (can cause DNS issues)
 
-Example: `mongodb+srv://username:yourpassword@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority`
+Example: `mongodb+srv://username:yourpassword@cluster.mongodb.net/flicker?retryWrites=true&w=majority`
 
 ## Step 2: Prepare Your Repository
 
 ### Update Exposed Credentials (URGENT)
 
-Your MongoDB password and OpenAI key were exposed in the previous commit. You should:
+**⚠️ IMPORTANT**: MongoDB credentials should NEVER be hardcoded in application.properties. This application now uses environment variables for all sensitive configuration.
+
+If you previously had hardcoded credentials:
 
 1. **Change your MongoDB password**:
    - Go to MongoDB Atlas → Database Access
    - Edit your user and set a new password
    
-2. **Rotate your OpenAI API key**:
-   - Go to [OpenAI API Keys](https://platform.openai.com/api-keys)
-   - Revoke the exposed key
-   - Create a new one
+2. **Set the new credentials in Render**:
+   - Go to Render Dashboard → Your Service → Environment
+   - Update the `MONGODB_URI` environment variable with the new password
+   - Make sure to URL encode any special characters in the password
 
 ### Push Changes
 
@@ -84,8 +87,14 @@ Click **"Advanced"** → **"Add Environment Variable"** and add:
 
 **Example MONGODB_URI**:
 ```
-mongodb+srv://your-username:your-new-password@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority
+mongodb+srv://your-username:your-password@cluster.mongodb.net/flicker?retryWrites=true&w=majority
 ```
+
+**Important Notes**:
+- Replace `your-username` and `your-password` with actual credentials
+- Keep `/flicker` before the `?` to specify the database name
+- Remove any `appName` parameter as it can cause DNS resolution issues
+- URL encode special characters in password (e.g., `@` → `%40`, `#` → `%23`)
 
 ### 3.4 Deploy
 
@@ -126,13 +135,30 @@ git push
 
 ### Database Connection Fails
 
-**Error**: `MongoSocketException` or `Connection refused`
+**Error**: `MongoSocketException`, `Connection refused`, or `DNS name not found`
 
 **Solutions**:
-1. Verify MongoDB Atlas allows connections from `0.0.0.0/0`
-2. Check your connection string format
-3. Ensure password doesn't contain special characters (use URL encoding)
-4. Verify database name is in the connection string
+1. **Verify MongoDB Atlas allows connections from anywhere**:
+   - Go to MongoDB Atlas → Network Access
+   - Ensure IP address `0.0.0.0/0` is added (allows connections from anywhere)
+   
+2. **Check your connection string format**:
+   - Must include the database name: `mongodb+srv://user:pass@cluster.mongodb.net/FLICKER?...`
+   - Remove `appName` parameter if present (can cause DNS issues)
+   - Ensure it starts with `mongodb+srv://` for Atlas or `mongodb://` for standard connection
+   
+3. **URL encode special characters in password**:
+   - If password contains `@`, `#`, `:`, `/`, etc., URL encode them
+   - Example: `@` becomes `%40`, `#` becomes `%23`
+   
+4. **Verify database name is in the connection string**:
+   - Should be: `.../FLICKER?retryWrites=true...`
+   - Not: `.../?retryWrites=true...`
+   
+5. **Check environment variable is set correctly in Render**:
+   - Go to Render Dashboard → Your Service → Environment
+   - Verify `MONGODB_URI` is set correctly
+   - No extra spaces or line breaks in the value
 
 ### App Crashes on Startup
 
