@@ -740,6 +740,12 @@ body.auth-page {
     padding: 40px 20px;
     height: auto !important;
     overflow-y: auto !important;
+
+    /* Define Primary Color for Auth Elements (Checkboxes etc) */
+    --primary: #8B5CF6;
+    /* Purple (Writer Theme) as default for Auth */
+    --primary-hover: #7C3AED;
+    --primary-soft: rgba(139, 92, 246, 0.15);
 }
 
 [data-theme="light"].auth-page {
