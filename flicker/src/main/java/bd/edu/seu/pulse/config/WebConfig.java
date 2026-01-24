@@ -2,12 +2,16 @@ package bd.edu.seu.pulse.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
+@Order(1)
 public class WebConfig implements WebMvcConfigurer {
 
     @Value("${app.upload.dir}")
@@ -15,13 +19,21 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Essential for Windows: Convert Path to URI to get proper file:/// prefix
-        String resourceLocation = Paths.get(uploadDir).toAbsolutePath().toUri().toString();
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        File uploadFolder = uploadPath.toFile();
+
+        if (!uploadFolder.exists()) {
+            uploadFolder.mkdirs();
+        }
+
+        String resourceLocation = uploadPath.toUri().toString();
+
         if (!resourceLocation.endsWith("/")) {
             resourceLocation += "/";
         }
 
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(resourceLocation);
+                .addResourceLocations(resourceLocation)
+                .setCachePeriod(3600);
     }
 }

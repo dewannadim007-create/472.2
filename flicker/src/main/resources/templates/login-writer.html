@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Flicker</title>
+    <title>Writer Login - Flicker</title>
     <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
@@ -18,25 +18,25 @@
 
     <div class="auth-container">
         <img src="/images/FLICKER.png" alt="Flicker Logo" class="auth-logo">
-        <h2>Flicker</h2>
-        <p class="subtitle">Log in to your account</p>
+        <h2>Writer Login</h2>
+        <p class="subtitle">Sign in to share your stories</p>
 
         <div class="error-message" th:if="${param.error}" style="text-align: center;">
-            Invalid username or password.
+            Invalid writer credentials. Please try again.
         </div>
         <div class="success-message" th:if="${param.logout}" style="text-align: center;">
             You've been logged out.
         </div>
         <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}" style="text-align: center;"></div>
 
-        <form th:action="@{/login}" method="post"
+        <form th:action="@{/login/process}" method="post"
             style="display: flex; flex-direction: column; gap: var(--spacing-md);">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="expectedRole" value="WRITER" />
 
             <div class="form-group">
-                <label for="username">Username or Email</label>
-                <input type="text" id="username" name="username" placeholder="Enter username or email" required
-                    autofocus>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
             </div>
 
             <div class="form-group">
@@ -45,13 +45,16 @@
             </div>
 
             <button type="submit" class="btn"
-                style="width: 100%; padding: 14px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; margin-top: var(--spacing-sm);">
-                Sign In
+                style="width: 100%; padding: 14px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; margin-top: var(--spacing-sm); background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                Sign In as Writer
             </button>
         </form>
 
         <div
-            style="text-align: center; margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
+            style="text-align: center; margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top: 1px solid var(--border);">
+            <p style="margin: 0 0 var(--spacing-sm) 0; color: var(--text-2); font-size: 0.875rem;">
+                Want to read instead? <a th:href="@{/login/reader}" class="auth-link">Sign in as Reader</a>
+            </p>
             <p style="margin: 0; color: var(--text-2); font-size: 0.875rem;">
                 Don't have an account? <a th:href="@{/register}" class="auth-link">Join Flicker</a>
             </p>

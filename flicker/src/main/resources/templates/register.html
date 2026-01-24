@@ -9,82 +9,106 @@
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
-<body class="reader-theme auth-page">
+<body class="auth-page">
 
-    <div class="auth-container wide">
-        <img src="/images/FLICKER.png" alt="Flicker Logo" class="auth-logo">
-        <h2>Join Flicker</h2>
-        <p class="subtitle">Start your microblogging journey</p>
+    <div class="ambient-light">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-        <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}" style="text-align: center;"></div>
+    <div class="auth-container" style="max-width: 450px; padding: 2.5rem 2rem; width: 95%;">
+        <div style="text-align: center;">
+            <img src="/images/FLICKER.png" alt="Flicker Logo" class="auth-logo"
+                style="width: 48px; height: 48px; margin-bottom: 0.5rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Join Flicker</h2>
+            <p class="subtitle" style="font-size: 0.95rem; margin-bottom: 1.5rem;">Start your microblogging journey</p>
+        </div>
+
+        <div class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"
+            style="text-align: center; margin-bottom: 1rem;"></div>
 
         <form th:action="@{/register}" th:object="${registrationDTO}" method="post"
-            style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+            style="display: flex; flex-direction: column; gap: 0.8rem;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" th:field="*{username}" placeholder="janesmith" required autofocus>
+            <!-- Personal Info (Grid) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="username" style="font-size: 0.85rem;">Username</label>
+                    <input type="text" id="username" th:field="*{username}" placeholder="janesmith" required autofocus
+                        style="padding: 10px;">
                 </div>
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" th:field="*{name}" placeholder="Jane Smith" required>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" th:field="*{password}" placeholder="••••••••" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}" placeholder="••••••••"
-                        required>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="name" style="font-size: 0.85rem;">Full Name</label>
+                    <input type="text" id="name" th:field="*{name}" placeholder="Jane Smith" required
+                        style="padding: 10px;">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="role">My Role</label>
-                <select id="role" th:field="*{role}" required style="width: 100%;">
+            <!-- Email Field -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="email" style="font-size: 0.85rem;">Email Address</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="jane@example.com" required
+                    style="width: 100%; padding: 10px;">
+            </div>
+
+            <!-- Role Selection -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="role" style="font-size: 0.85rem;">I am a...</label>
+                <select id="role" th:field="*{role}" required style="width: 100%; padding: 10px;">
                     <option value="" disabled selected>Select your journey</option>
-                    <option value="READER">Reader (Passionate about content)</option>
-                    <option value="WRITER">Writer (Passionate about sharing)</option>
+                    <option value="READER">Reader</option>
+                    <option value="WRITER">Writer</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label style="margin-bottom: 0.75rem; display: block;">Select Interests</label>
-                <div class="interests-checkboxes"
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; max-height: 200px; overflow-y: auto; padding: 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-page);">
+            <!-- Password Section (Grid) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="password" style="font-size: 0.85rem;">Password</label>
+                    <input type="password" id="password" th:field="*{password}" placeholder="••••••" required
+                        style="padding: 10px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="confirmPassword" style="font-size: 0.85rem;">Confirm</label>
+                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}" placeholder="••••••"
+                        required style="padding: 10px;">
+                </div>
+            </div>
+
+            <!-- Interests Section (Compact) -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label
+                    style="margin-bottom: 0.5rem; display: block; font-weight: 600; font-size: 0.85rem;">Interests</label>
+                <div class="interests-grid"
+                    style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                     <label
-                        th:each="interest : ${ {'technology','science','art','music','sports','travel','food','fashion','health','education','business','gaming','books'} }"
-                        style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem; font-weight: 500; cursor: pointer;">
-                        <input type="checkbox" name="selectedInterests" th:value="${interest}"
-                            style="width: 18px; height: 18px; accent-color: var(--primary);">
-                        <span th:text="${#strings.capitalize(interest)}">Interest</span>
+                        th:each="interest : ${ {'Tech','Science','Art','Music','Sports','Food','Fashion','Health','Biz','Gaming'} }"
+                        class="interest-pill" style="margin: 0;">
+                        <input type="checkbox" name="selectedInterests" th:value="${interest}">
+                        <span class="pill-content" th:text="${interest}"
+                            style="padding: 6px 14px; font-size: 0.8rem;">Interest</span>
                     </label>
                 </div>
             </div>
 
+            <!-- Submit Button -->
             <button type="submit" class="btn"
-                style="width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 12px; font-weight: 700; margin-top: var(--spacing-sm);">
+                style="width: 100%; padding: 0.8rem; font-size: 1rem; border-radius: 99px; font-weight: 700; margin-top: 0.4rem; box-shadow: var(--shadow-md);">
                 Create Account
             </button>
         </form>
 
-        <div
-            style="text-align: center; margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
-            <p style="margin: 0; color: var(--text-2); font-size: 0.875rem;">
-                Already have an account? <a th:href="@{/login}" class="auth-link">Sign in here</a>
+        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <p style="margin: 0; color: var(--text-2); font-size: 0.85rem;">
+                Already have an account? <a th:href="@{/landing}" class="auth-link">Sign in here</a>
             </p>
         </div>
     </div>
 
     <script th:inline="javascript">
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', currentTheme);
+        // ALWAYS use dark mode for auth pages - ignore user preference
+        document.body.setAttribute('data-theme', 'dark');
     </script>
 </body>
 

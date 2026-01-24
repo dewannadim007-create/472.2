@@ -12,13 +12,24 @@ public class User {
     private String id;
     @Indexed(unique = true)
     private String username;
+    @Indexed(unique = true, sparse = true)
+    private String email;
     private String password;
     private String name;
     private String role;
+    private String accountStatus = "ACTIVE";
     private List<String> interests;
     private List<String> followingWriters;
     private List<String> followers;
     private String profilePhotoUrl;
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
+    }
 
     public String getId() {
         return id;
@@ -34,6 +45,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -95,10 +114,12 @@ public class User {
     public User() {
     }
 
-    public User(String id, String username, String password, String name, String role, List<String> interests,
+    public User(String id, String username, String email, String password, String name, String role,
+            List<String> interests,
             List<String> followingWriters, List<String> followers) {
         this.id = id;
         this.username = username;
+        this.email = email;
         this.password = password;
         this.name = name;
         this.role = role;

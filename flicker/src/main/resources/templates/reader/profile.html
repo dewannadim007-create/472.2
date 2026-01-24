@@ -6,25 +6,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Flicker</title>
     <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
+    <script th:src="@{/js/nav-utils.js}" defer></script>
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
 <body class="reader-theme">
     <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
-        <p>Your daily dose of inspiration.</p>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+        <div class="header-center">
+            <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker</h1>
+        </div>
     </div>
 
-    <div class="nav">
-        <div class="section-header">Feeds</div>
+    <div class="nav" id="sidebar">
+        <!-- User Info at Top -->
+        <div style="padding: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto 0.5rem;"
+                th:text="${currentUser.name != null && !currentUser.name.isEmpty() ? #strings.substring(currentUser.name, 0, 1) : 'U'}">
+                U</div>
+            <strong style="display: block; font-size: 0.95rem; color: var(--text-1);"
+                th:text="${currentUser.name}">Reader</strong>
+            <span style="font-size: 0.8rem; color: var(--text-3);"
+                th:text="'@' + ${currentUser.username}">@username</span>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="section-header">FEEDS</div>
         <a th:href="@{/reader/home(userId=${userId})}">Home</a>
         <a th:href="@{/reader/following(userId=${userId})}">Following</a>
         <a th:href="@{/reader/suggestions(userId=${userId})}">Suggestions</a>
 
-        <div class="section-header">Account</div>
+        <div class="section-header">ACCOUNT</div>
+        <a th:href="@{/reader/activity(userId=${userId})}">Recent Activity</a>
         <a th:href="@{/reader/profile(userId=${userId})}" class="active">Profile</a>
 
-        <button id="theme-toggle">🌙</button>
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-sidebar"
+            style="margin-top: auto; padding: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-1); border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem;">Switch
+            Theme</button>
+
+        <!-- Logout -->
         <form th:action="@{/logout}" method="post" style="width: 100%;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button type="submit" class="logout-link">Logout</button>
@@ -38,30 +61,17 @@
 
             <!-- Profile View Mode -->
             <div th:unless="${profileEditDTO}" style="width: 100%;">
-                <div class="profile-header-container">
-                    <div class="profile-cover"></div>
-                    <div class="profile-info">
-                        <div class="profile-avatar-large">
-                            <div class="profile-avatar-inner"
-                                th:if="${currentUser.profilePhotoUrl == null || currentUser.profilePhotoUrl.isEmpty()}"
-                                th:text="${#strings.substring(currentUser.name, 0, 1)}">U
-                            </div>
-                            <!-- Note: Profile photo upload is disabled, so this is just for display if URL exists -->
-                            <img th:if="${currentUser.profilePhotoUrl != null && !currentUser.profilePhotoUrl.isEmpty()}"
-                                th:src="${currentUser.profilePhotoUrl}" alt="Profile Photo"
-                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                <div class="card" style="padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 th:text="${currentUser.name}" style="margin: 0; font-size: 1.75rem;">User Name</h2>
+                            <p th:text="'@' + ${currentUser.username}"
+                                style="margin: 0.25rem 0 0.5rem 0; color: var(--text-2);">@username</p>
+                            <span class="badge" th:text="${currentUser.role}">Role</span>
                         </div>
-                        <div class="profile-details">
-                            <h2 th:text="${currentUser.name}">User Name</h2>
-                            <p th:text="'@' + ${currentUser.username}">@username</p>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <span class="badge" th:text="${currentUser.role}">Role</span>
-                            </div>
-                        </div>
-                        <div style="margin-left: auto; margin-top: 1rem;">
-                            <a th:href="@{/reader/profile/edit(userId=${userId})}" class="btn btn-secondary">Edit
-                                Profile</a>
-                        </div>
+                        <a th:href="@{/reader/profile/edit(userId=${userId})}" class="btn btn-secondary">Edit
+                            Profile</a>
                     </div>
                 </div>
 
@@ -89,6 +99,8 @@
                     <h2 style="margin: 0;">Edit Profile</h2>
                     <p style="color: var(--text-2); margin: 0;">Keep your profile information up to date.</p>
                 </div>
+
+
 
                 <form th:action="@{/reader/profile/edit}" th:object="${profileEditDTO}" method="post">
                     <input type="hidden" name="userId" th:value="${userId}" />
@@ -123,15 +135,13 @@
                     <div class="form-group">
                         <label>Interests</label>
                         <div class="interests-grid"
-                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px;">
+                            style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 8px;">
                             <label
-                                th:each="interest : ${{'technology', 'science', 'art', 'music', 'sports', 'travel', 'food', 'fashion', 'health', 'education', 'business', 'gaming', 'books', 'photography', 'design'}}"
-                                style="display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.2s;"
-                                onmouseover="this.style.background='var(--bg-hover)'"
-                                onmouseout="this.style.background='transparent'">
+                                th:each="interest : ${ {'technology', 'science', 'art', 'music', 'sports', 'travel', 'food', 'fashion', 'health', 'education', 'business', 'gaming', 'books', 'photography', 'design'} }"
+                                class="interest-pill">
                                 <input type="checkbox" name="selectedInterests" th:value="${interest}"
                                     th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains(interest)}">
-                                <span th:text="${#strings.capitalize(interest)}">Interest</span>
+                                <span class="pill-content" th:text="${#strings.capitalize(interest)}">Interest</span>
                             </label>
                         </div>
                         <small style="color: var(--text-3); display: block; margin-top: 8px;">Select all your
@@ -174,25 +184,7 @@
             }
         }
 
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-
-        function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
-        }
+        // Theme toggle functionality handled by nav-utils.js
     </script>
 </body>
 

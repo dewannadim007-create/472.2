@@ -6,30 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Flicker</title>
     <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
+    <script th:src="@{/js/nav-utils.js}" defer></script>
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
 <body class="writer-theme">
+    <div class="nav-overlay" id="navOverlay"></div>
+
     <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
-                style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
-        <p>Your daily dose of inspiration.</p>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+        <div class="header-center">
+            <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
+                    style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
+        </div>
     </div>
 
-    <div class="nav">
-        <div
-            style="padding: 10px 15px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Studio</div>
+    <div class="nav" id="sidebar">
+        <!-- User Info at Top of Sidebar -->
+        <div style="padding: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto 0.5rem;"
+                th:text="${currentUser.name != null && !currentUser.name.isEmpty() ? #strings.substring(currentUser.name, 0, 1) : 'U'}">
+                U</div>
+            <strong style="display: block; font-size: 0.95rem; color: var(--text-1);"
+                th:text="${currentUser.name}">Writer</strong>
+            <span style="font-size: 0.8rem; color: var(--text-3);"
+                th:text="'@' + ${currentUser.username}">@username</span>
+        </div>
+
+        <div class="section-header">STUDIO</div>
         <a th:href="@{/writer/home(userId=${userId})}">Dashboard</a>
+        <a th:href="@{/writer/my-posts(userId=${userId})}">My Posts</a>
         <a th:href="@{/writer/post/new(userId=${userId})}">Create Post</a>
         <a th:href="@{/writer/followers(userId=${userId})}">Followers</a>
 
-        <div
-            style="padding: 10px 15px; margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
-            Account</div>
+        <div class="section-header">ACCOUNT</div>
         <a th:href="@{/writer/profile(userId=${userId})}" class="active">Profile</a>
 
-        <button id="theme-toggle">🌙</button>
+        <button id="theme-toggle-sidebar"
+            style="margin-top: auto; padding: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-1); border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem;">Switch
+            Theme</button>
         <form th:action="@{/logout}" method="post" style="width: 100%;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button type="submit" class="logout-link">Logout</button>
@@ -37,8 +54,7 @@
     </div>
 
     <div class="container">
-        <div class="form-container"
-            style="margin-top: 1rem; background: var(--card-bg); padding: 20px; border-radius: 4px; border: 1px solid var(--border-color);">
+        <div class="form-container" style="margin-top: 0;">
             <div class="success-message" th:if="${param.successMessage}" th:text="${param.successMessage}"
                 style="background: #D4EDDA; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
             </div>
@@ -48,48 +64,37 @@
 
             <!-- Profile View Mode -->
             <div th:unless="${profileEditDTO}" style="width: 100%;">
-                <div class="profile-header-container">
-                    <div class="profile-cover"></div>
-                    <div class="profile-info">
-                        <div class="profile-avatar-large">
-                            <div class="profile-avatar-inner" th:text="${#strings.substring(currentUser.name, 0, 1)}">U
-                            </div>
+                <div class="card" style="padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 th:text="${currentUser.name}" style="margin: 0; font-size: 1.75rem;">User Name</h2>
+                            <p th:text="'@' + ${currentUser.username}"
+                                style="margin: 0.25rem 0 0.5rem 0; color: var(--text-2);">@username</p>
+                            <span class="badge primary" th:text="${currentUser.role}">Role</span>
                         </div>
-                        <div class="profile-details">
-                            <h2 th:text="${currentUser.name}">User Name</h2>
-                            <p th:text="'@' + ${currentUser.username}">@username</p>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <span class="badge"
-                                    style="background: var(--bg-hover); padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; font-weight: 600;"
-                                    th:text="${currentUser.role}">Role</span>
-                            </div>
-                        </div>
-                        <div style="margin-left: auto; margin-top: 1rem;">
-                            <a th:href="@{/writer/profile/edit(userId=${userId})}" class="btn btn-secondary">Edit
-                                Profile</a>
-                        </div>
+                        <a th:href="@{/writer/profile/edit(userId=${userId})}" class="btn btn-secondary">Edit
+                            Profile</a>
                     </div>
                 </div>
 
                 <div style="margin-top: 2rem;">
-                    <h3
-                        style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                    <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
                         About</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                         <div class="card" style="padding: 1rem;">
-                            <h5 style="margin-top: 0; color: var(--text-secondary);">Interests</h5>
+                            <h5 style="margin-top: 0; color: var(--text-2);">Interests</h5>
                             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
                                 <span th:each="interest : ${currentUser.interests}" th:text="${interest}"
-                                    style="background: var(--bg-hover); padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">Interest</span>
+                                    class="badge">Interest</span>
                                 <span th:if="${currentUser.interests == null || currentUser.interests.isEmpty()}"
-                                    style="color: var(--text-tertiary); font-style: italic;">No interests added
+                                    style="color: var(--text-3); font-style: italic;">No interests added
                                     yet.</span>
                             </div>
                         </div>
-                        <!-- Placeholder for bio or stats -->
                         <div class="card" style="padding: 1rem;">
-                            <h5 style="margin-top: 0; color: var(--text-secondary);">Account Status</h5>
-                            <p style="color: var(--success-color, green);">Active</p>
+                            <h5 style="margin-top: 0; color: var(--text-2);">Account Status</h5>
+                            <p style="color: var(--success);">Active</p>
                         </div>
                     </div>
                 </div>
@@ -97,88 +102,71 @@
 
             <!-- Profile Edit Mode -->
             <div th:if="${profileEditDTO}" style="width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <div>
-                        <h2 style="margin: 0;">Edit Profile</h2>
-                        <p style="color: var(--text-secondary); margin: 0;">Update your personal information.</p>
-                    </div>
+                <div class="welcome-header" style="margin-bottom: 2rem;">
+                    <h2 style="margin: 0;">Edit Profile</h2>
+                    <p style="color: var(--text-2);">Update your personal information and preferences.</p>
                 </div>
+
+
 
                 <form th:action="@{/writer/profile/edit}" th:object="${profileEditDTO}" method="post">
                     <input type="hidden" name="userId" th:value="${userId}" />
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                        <!-- Left Column: Basics -->
-                        <div>
-                            <h4
-                                style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                                Basic Information</h4>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label for="username"
-                                    style="display: block; font-weight: bold; margin-bottom: 5px;">Username</label>
-                                <input type="text" id="username" th:field="*{username}" readonly
-                                    style="background: var(--bg-hover); cursor: not-allowed; opacity: 0.7;">
-                                <small style="color: var(--text-secondary);">Usernames cannot be changed.</small>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label for="name" style="display: block; font-weight: bold; margin-bottom: 5px;">Full
-                                    Name</label>
-                                <input type="text" id="name" th:field="*{name}" style="font-weight: 500;">
-                            </div>
-
-                            <h4
-                                style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 2rem;">
-                                Security</h4>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label for="password" style="display: block; font-weight: bold; margin-bottom: 5px;">New
-                                    Password</label>
-                                <input type="password" id="password" th:field="*{password}"
-                                    placeholder="Leave blank to keep current">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label for="confirmPassword"
-                                    style="display: block; font-weight: bold; margin-bottom: 5px;">Confirm
-                                    Password</label>
-                                <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
-                                    placeholder="Confirm new password" oninput="checkPasswordMatch()">
-                                <small id="passwordMatchMessage" style="color: var(--text-secondary);">Matching
-                                    status</small>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: Interests -->
-                        <div>
-                            <h4
-                                style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                                Interests</h4>
-                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Select
-                                topics you are interested in or write about.</p>
-
-                            <div class="interests-grid"
-                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.8rem;">
-                                <!-- Standard Interests Loop -->
-                                <label
-                                    th:each="interest : ${ {'technology','science','art','music','sports','travel','food','fashion','health','education','business','gaming','books','photography','design'} }"
-                                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;"
-                                    class="interest-card-label">
-                                    <input type="checkbox" name="selectedInterests" th:value="${interest}"
-                                        th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains(interest)}"
-                                        style="margin-bottom: 0.5rem;">
-                                    <span th:text="${#strings.capitalize(interest)}"
-                                        style="font-weight: 500;">Interest</span>
-                                </label>
-                            </div>
-                        </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" th:field="*{username}" readonly
+                            style="background-color: var(--bg-hover); cursor: not-allowed; color: var(--text-2); width: 100%;">
+                        <small style="color: var(--text-3);">Usernames cannot be changed.</small>
                     </div>
 
-                    <div class="form-actions">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" th:field="*{name}" style="width: 100%;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="password">New Password</label>
+                        <input type="password" id="password" th:field="*{password}"
+                            placeholder="Enter new password (optional)" style="width: 100%;">
+                        <small style="color: var(--text-3);">Leave blank to keep your current password</small>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                            placeholder="Confirm new password" oninput="checkPasswordMatch()" style="width: 100%;">
+                        <small id="passwordMatchMessage" style="color: var(--text-3);">Please confirm your new
+                            password</small>
+                    </div>
+
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem;">Interests</h3>
+                        <p style="color: var(--text-2); margin-bottom: 1.5rem;">Select topics you write about or
+                            follow.</p>
+
+                        <div class="interests-grid" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                            <label
+                                th:each="interest : ${ {'technology','science','art','music','sports','travel','food','fashion','health','education','business','gaming','books','photography','design'} }"
+                                class="interest-pill">
+                                <input type="checkbox" name="selectedInterests" th:value="${interest}"
+                                    th:checked="${profileEditDTO.interests != null && profileEditDTO.interests.contains(interest)}">
+                                <span class="pill-content" th:text="${#strings.capitalize(interest)}">
+                                    Interest
+                                </span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions"
+                        style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
                         <a th:href="@{/writer/profile(userId=${userId})}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn">Save Changes</button>
                     </div>
                 </form>
             </div>
-
         </div>
+
     </div>
     </div>
 
@@ -190,7 +178,7 @@
 
             if (password === '' && confirmPassword === '') {
                 message.textContent = 'Please confirm your new password';
-                message.style.color = 'var(--text-secondary)';
+                message.style.color = 'var(--text-2)';
                 return;
             }
 
@@ -202,35 +190,11 @@
 
             if (password === confirmPassword) {
                 message.textContent = 'Passwords match!';
-                message.style.color = '#198754';
+                message.style.color = 'var(--success)';
             } else {
                 message.textContent = 'Passwords do not match';
-                message.style.color = '#dc3545';
+                message.style.color = 'var(--danger)';
             }
-        }
-
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-
-        // Check for saved theme preference or default to light theme
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-
-        // Theme toggle click handler
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-
-        // Update theme icon
-        function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
         }
     </script>
 </body>

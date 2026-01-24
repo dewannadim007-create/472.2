@@ -3,6 +3,8 @@ package bd.edu.seu.pulse.service;
 import bd.edu.seu.pulse.dto.CommentViewDTO;
 import bd.edu.seu.pulse.dto.CreatePostDTO;
 import bd.edu.seu.pulse.dto.PostViewDTO;
+import bd.edu.seu.pulse.dto.ReaderActivityDTO;
+import bd.edu.seu.pulse.model.Comment;
 import bd.edu.seu.pulse.model.Post;
 import bd.edu.seu.pulse.model.User;
 import bd.edu.seu.pulse.repository.CommentRepository;
@@ -13,7 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +56,15 @@ public class PostService {
         if (!author.getRole().equals("WRITER")) {
             return "Only writers can create posts";
         }
+        if ("FREEZED".equals(author.getAccountStatus())) {
+            return "Your account is freezed. You cannot create posts.";
+        }
 
         Post post = new Post();
         post.setAuthorId(authorId);
         post.setContent(dto.getContent().trim());
         post.setTimestamp(LocalDateTime.now());
+        post.setVisibility(dto.getVisibility() != null ? dto.getVisibility() : "PUBLIC");
         post.setUpvoteCount(0);
         post.setDownvoteCount(0);
         post.setUpvotedBy(new ArrayList<>());
@@ -85,11 +93,15 @@ public class PostService {
         if (!author.getRole().equals("WRITER")) {
             return "Only writers can create posts";
         }
+        if ("FREEZED".equals(author.getAccountStatus())) {
+            return "Your account is freezed. You cannot create posts.";
+        }
 
         Post post = new Post();
         post.setAuthorId(authorId);
         post.setContent(dto.getContent().trim());
         post.setTimestamp(LocalDateTime.now());
+        post.setVisibility(dto.getVisibility() != null ? dto.getVisibility() : "PUBLIC");
         post.setUpvoteCount(0);
         post.setDownvoteCount(0);
         post.setUpvotedBy(new ArrayList<>());
@@ -170,6 +182,10 @@ public class PostService {
             return new ArrayList<>();
         }
 
+        posts = posts.stream()
+                .filter(post -> "PUBLIC".equals(post.getVisibility()))
+                .collect(Collectors.toList());
+
         List<String> authorIds = posts.stream()
                 .map(Post::getAuthorId)
                 .distinct()
@@ -222,6 +238,11 @@ public class PostService {
             return "Post not found or invalid user";
         }
 
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null && "FREEZED".equals(user.getAccountStatus())) {
+            return "Your account is freezed. You cannot vote.";
+        }
+
         boolean alreadyUpvoted = post.getUpvotedBy().contains(userId);
         boolean alreadyDownvoted = post.getDownvotedBy().contains(userId);
 
@@ -244,6 +265,11 @@ public class PostService {
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null || userId == null) {
             return "Post not found or invalid user";
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null && "FREEZED".equals(user.getAccountStatus())) {
+            return "Your account is freezed. You cannot vote.";
         }
 
         boolean alreadyUpvoted = post.getUpvotedBy().contains(userId);
@@ -289,12 +315,15 @@ public class PostService {
 
         post.setContent(dto.getContent().trim());
 
+        if (dto.getVisibility() != null) {
+            post.setVisibility(dto.getVisibility());
+        }
+
         if (dto.getImageCaption() != null) {
             post.setImageCaption(dto.getImageCaption().trim());
         }
 
         if (removeImage) {
-            // Logic to remove existing image
             if (post.getImageUrl() != null) {
                 fileUploadService.deleteImage(post.getImageUrl());
                 post.setImageUrl(null);
@@ -303,9 +332,7 @@ public class PostService {
                 post.setImageCaption(null);
             }
         } else if (imageFile != null && !imageFile.isEmpty()) {
-            // Logic to update/replace image
             try {
-                // Delete old image if exists
                 if (post.getImageUrl() != null) {
                     fileUploadService.deleteImage(post.getImageUrl());
                 }
@@ -314,8 +341,6 @@ public class PostService {
                 post.setImageUrl(imageUrl);
                 post.setImageFileName(imageFile.getOriginalFilename());
                 post.setImageFileSize(imageFile.getSize());
-
-                // Caption is already set above if provided
             } catch (Exception e) {
                 return "Error uploading image: " + e.getMessage();
             }
@@ -337,6 +362,37 @@ public class PostService {
 
         postRepository.delete(post);
         return "SUCCESS";
+    }
+
+    public List<PostViewDTO> getWriterPostsForReader(String readerId, String writerId) {
+        if (readerId == null || writerId == null) {
+            return new ArrayList<>();
+        }
+
+        User reader = userRepository.findById(readerId).orElse(null);
+        User writer = userRepository.findById(writerId).orElse(null);
+        if (reader == null || writer == null) {
+            return new ArrayList<>();
+        }
+
+        boolean isFollowing = reader.getFollowingWriters() != null && reader.getFollowingWriters().contains(writerId);
+        Sort sort = Sort.by(Sort.Direction.DESC, "timestamp");
+
+        List<Post> posts;
+        if (isFollowing) {
+            posts = postRepository.findByAuthorId(writerId, sort);
+        } else {
+            posts = postRepository.findByAuthorIdAndVisibility(writerId, "PUBLIC", sort);
+        }
+
+        return posts.stream()
+                .map(post -> {
+                    PostViewDTO dto = toPostViewDTO(post, writer.getName(), readerId);
+                    List<CommentViewDTO> comments = commentService.getCommentsByPost(post.getId(), readerId);
+                    dto.setComments(comments);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public List<PostViewDTO> getAllPosts(String sortBy) {
@@ -386,6 +442,7 @@ public class PostService {
         dto.setImageCaption(post.getImageCaption());
         dto.setImageFileName(post.getImageFileName());
         dto.setImageFileSize(post.getImageFileSize());
+        dto.setVisibility(post.getVisibility());
 
         if (currentUserId != null) {
             dto.setHasUpvoted(post.getUpvotedBy().contains(currentUserId));
@@ -393,5 +450,65 @@ public class PostService {
         }
 
         return dto;
+    }
+
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
+    }
+
+    public List<ReaderActivityDTO> getReaderActivity(String userId) {
+        List<ReaderActivityDTO> activities = new ArrayList<>();
+
+        List<Post> upvotedPosts = postRepository.findByUpvotedByContaining(userId);
+        for (Post post : upvotedPosts) {
+            String preview = post.getContent().length() > 50 ? post.getContent().substring(0, 50) + "..."
+                    : post.getContent();
+            activities.add(new ReaderActivityDTO("UPVOTE", preview, post.getId(), null, post.getTimestamp()));
+        }
+
+        List<Post> downvotedPosts = postRepository.findByDownvotedByContaining(userId);
+        for (Post post : downvotedPosts) {
+            String preview = post.getContent().length() > 50 ? post.getContent().substring(0, 50) + "..."
+                    : post.getContent();
+            activities.add(new ReaderActivityDTO("DOWNVOTE", preview, post.getId(), null, post.getTimestamp()));
+        }
+
+        List<Comment> userComments = commentRepository.findByAuthorId(userId);
+        for (Comment comment : userComments) {
+            Post post = postRepository.findById(comment.getPostId()).orElse(null);
+            String postPreview = post != null
+                    ? (post.getContent().length() > 50 ? post.getContent().substring(0, 50) + "..." : post.getContent())
+                    : "Deleted Post";
+            activities.add(new ReaderActivityDTO("COMMENT", postPreview, comment.getPostId(), comment.getContent(),
+                    comment.getTimestamp()));
+        }
+
+        activities.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+
+        for (ReaderActivityDTO activity : activities) {
+            activity.setTimeAgo(getTimeAgo(activity.getTimestamp()));
+        }
+
+        return activities;
+    }
+
+    public String getTimeAgo(LocalDateTime timestamp) {
+        if (timestamp == null)
+            return "recently";
+
+        Duration duration = Duration.between(timestamp, LocalDateTime.now());
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+
+        if (minutes < 1)
+            return "just now";
+        if (minutes < 60)
+            return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+        if (hours < 24)
+            return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+        if (days < 7)
+            return days + " day" + (days > 1 ? "s" : "") + " ago";
+        return timestamp.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
     }
 }

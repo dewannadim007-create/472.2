@@ -6,26 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post - Flicker</title>
     <link rel="stylesheet" th:href="@{/css/flicker-clean.css}">
+    <script th:src="@{/js/nav-utils.js}" defer></script>
     <link rel="icon" type="image/png" th:href="@{/images/FLICKER.png}">
 </head>
 
 <body class="writer-theme">
+    <div class="nav-overlay" id="navOverlay"></div>
     <div class="header">
-        <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
-                style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
-        <p>Your daily dose of inspiration.</p>
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+        <div class="header-center">
+            <h1><img src="/images/FLICKER.png" alt="Flicker Icon" class="header-icon">Flicker <span
+                    style="font-weight: 300; font-size: 0.8em; margin-left: 8px; opacity: 0.8;">Studio</span></h1>
+        </div>
     </div>
+    <div class="nav" id="sidebar">
+        <!-- User Info at Top of Sidebar -->
+        <div style="padding: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto 0.5rem;"
+                th:text="${#strings.substring(currentUser.name, 0, 1)}">U</div>
+            <strong style="display: block; font-size: 0.95rem; color: var(--text-1);"
+                th:text="${currentUser.name}">Writer</strong>
+            <span style="font-size: 0.8rem; color: var(--text-3);"
+                th:text="'@' + ${currentUser.username}">@username</span>
+        </div>
 
-    <div class="nav">
-        <div class="section-header">Studio</div>
+        <div class="section-header">STUDIO</div>
         <a th:href="@{/writer/home(userId=${userId})}">Dashboard</a>
+        <a th:href="@{/writer/my-posts(userId=${userId})}">My Posts</a>
         <a th:href="@{/writer/post/new(userId=${userId})}">Create Post</a>
         <a th:href="@{/writer/followers(userId=${userId})}">Followers</a>
 
-        <div class="section-header">Account</div>
+        <div class="section-header">ACCOUNT</div>
         <a th:href="@{/writer/profile(userId=${userId})}">Profile</a>
 
-        <button id="theme-toggle">🌙</button>
+        <button id="theme-toggle-sidebar"
+            style="margin-top: auto; padding: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-1); border-radius: var(--radius); cursor: pointer; font-weight: 600; font-size: 0.9rem;">Switch
+            Theme</button>
         <form th:action="@{/logout}" method="post" style="width: 100%;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button type="submit" class="logout-link">Logout</button>
@@ -57,18 +75,27 @@
                         style="resize: vertical; font-family: var(--font-content); font-size: 1.1rem; line-height: 1.6;"></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="visibility">Post Visibility</label>
+                    <select id="visibility" th:field="*{visibility}">
+                        <option value="PUBLIC">Public (Visible to everyone)</option>
+                        <option value="PRIVATE">Private (Only visible to followers)</option>
+                    </select>
+                </div>
+
                 <!-- Image Management Section -->
                 <div
-                    style="background: var(--bg-hover); padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg);">
-                    <h4 style="margin-bottom: var(--spacing-sm); color: var(--text-1);">Visuals</h4>
+                    style="background: var(--bg-input); padding: var(--spacing-lg); border-radius: var(--radius); margin-bottom: var(--spacing-lg); border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: var(--spacing-md); color: var(--text-1);">Visuals</h4>
 
                     <!-- Existing Image Display -->
                     <div th:if="${post.imageUrl != null}" style="margin-bottom: var(--spacing-md);">
-                        <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">Current Image:</p>
+                        <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-1);">
+                            Current Image:</p>
                         <img th:src="${post.imageUrl}" alt="Post Image"
-                            style="max-height: 200px; border-radius: 8px; border: 1px solid var(--border);">
+                            style="max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: block;">
 
-                        <div style="margin-top: 8px;">
+                        <div style="margin-top: var(--spacing-sm);">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                 <input type="checkbox" name="removeImage" value="true">
                                 <span style="color: var(--danger); font-weight: 500;">Remove this image</span>
@@ -77,14 +104,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="imageFile"
+                        <label for="imageFile" style="color: var(--text-1);"
                             th:text="${post.imageUrl != null ? 'Change Image' : 'Upload Image'}">Upload Image</label>
                         <input type="file" id="imageFile" name="imageFile" accept="image/*">
                         <p style="font-size: 0.8rem; color: var(--text-3); margin-top: 4px;">Supports JPG, PNG, GIF</p>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label for="imageCaption">Image Caption</label>
+                        <label for="imageCaption" style="color: var(--text-1);">Image Caption</label>
                         <input type="text" id="imageCaption" th:field="*{imageCaption}"
                             placeholder="Add a caption for your image...">
                     </div>
@@ -99,23 +126,7 @@
     </div>
 
     <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-
-        function updateThemeIcon(theme) {
-            themeToggle.textContent = theme === 'light' ? '🌙 Switch to Dark' : '☀️ Switch to Light';
-        }
+        // Logic handled by nav-utils.js
     </script>
 </body>
 

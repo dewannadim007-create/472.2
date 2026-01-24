@@ -3,6 +3,7 @@ package bd.edu.seu.pulse.dto;
 public class CreatePostDTO {
     private String content;
     private String imageCaption;
+    private String visibility = "PUBLIC";
 
     public CreatePostDTO() {
     }
@@ -31,4 +32,12 @@ public class CreatePostDTO {
     public void setImageCaption(String imageCaption) {
         this.imageCaption = imageCaption;
     }
-} 
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+}

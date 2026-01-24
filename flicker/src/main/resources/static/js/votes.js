@@ -1,6 +1,7 @@
-// Vote System with Visual Feedback
+// Vote System with AJAX
 document.addEventListener('DOMContentLoaded', function () {
     const voteBtns = document.querySelectorAll('.vote-btn');
+    const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
 
     voteBtns.forEach(btn => {
         btn.addEventListener('click', function (e) {
@@ -8,45 +9,84 @@ document.addEventListener('DOMContentLoaded', function () {
             e.stopPropagation();
 
             const postId = this.dataset.postId;
-            const voteType = this.classList.contains('upvote') ? 'up' : 'down';
+            const userId = this.dataset.userId; // Ensure this is set in HTML
+            const isUpvote = this.classList.contains('upvote');
+            const url = isUpvote
+                ? `/reader/post/${postId}/upvote`
+                : `/reader/post/${postId}/downvote`;
+
+            // Optimistic UI Update
             const voteContainer = this.closest('.post-actions');
             const upvoteBtn = voteContainer.querySelector('.upvote');
             const downvoteBtn = voteContainer.querySelector('.downvote');
-            const voteCount = voteContainer.querySelector('.vote-count');
+            const upvoteCount = voteContainer.querySelector('.upvote-count');
+            const downvoteCount = voteContainer.querySelector('.downvote-count');
 
-            // Toggle vote
-            if (this.classList.contains('voted')) {
-                // Remove vote
-                this.classList.remove('voted');
-                updateVoteCount(voteCount, voteType === 'up' ? -1 : 1);
-            } else {
-                // Add vote and remove opposite
-                if (voteType === 'up') {
-                    if (downvoteBtn.classList.contains('voted')) {
-                        downvoteBtn.classList.remove('voted');
-                        updateVoteCount(voteCount, 2); // Remove downvote and add upvote
-                    } else {
-                        updateVoteCount(voteCount, 1);
-                    }
-                    upvoteBtn.classList.add('voted');
+            let upChange = 0;
+            let downChange = 0;
+
+            if (isUpvote) {
+                if (this.classList.contains('voted')) {
+                    // Removing upvote
+                    upChange = -1;
                 } else {
-                    if (upvoteBtn.classList.contains('voted')) {
-                        upvoteBtn.classList.remove('voted');
-                        updateVoteCount(voteCount, -2); // Remove upvote and add downvote
-                    } else {
-                        updateVoteCount(voteCount, -1);
+                    // Adding upvote
+                    upChange = 1;
+                    if (downvoteBtn.classList.contains('voted')) {
+                        // Switching from down to up
+                        downChange = -1;
                     }
-                    downvoteBtn.classList.add('voted');
+                }
+            } else {
+                if (this.classList.contains('voted')) {
+                    // Removing downvote
+                    downChange = -1;
+                } else {
+                    // Adding downvote
+                    downChange = 1;
+                    if (upvoteBtn.classList.contains('voted')) {
+                        // Switching from up to down
+                        upChange = -1;
+                    }
                 }
             }
 
-            // Here you would make an AJAX call to save the vote
-            // saveVote(postId, voteType);
+            // Perform Fetch
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: `userId=${userId}`
+            }).then(async response => {
+                if (response.ok) {
+                    // Update UI classes on success (or keep optimistic)
+                    if (this.classList.contains('voted')) {
+                        this.classList.remove('voted');
+                    } else {
+                        if (isUpvote) {
+                            downvoteBtn.classList.remove('voted');
+                            upvoteBtn.classList.add('voted');
+                        } else {
+                            upvoteBtn.classList.remove('voted');
+                            downvoteBtn.classList.add('voted');
+                        }
+                    }
+                    updateVoteCount(upvoteCount, upChange);
+                    updateVoteCount(downvoteCount, downChange);
+                } else {
+                    console.error('Vote failed:', await response.text());
+                    // Revert optimistic update (simple reload or reversal logic could go here)
+                    alert("Failed to vote. Please try again.");
+                }
+            }).catch(error => console.error('Error:', error));
         });
     });
 });
 
 function updateVoteCount(element, change) {
+    if (!element) return;
     const current = parseInt(element.textContent) || 0;
     element.textContent = current + change;
 
@@ -55,10 +95,4 @@ function updateVoteCount(element, change) {
     setTimeout(() => {
         element.style.transform = 'scale(1)';
     }, 200);
-}
-
-// Optional: Save vote to backend
-function saveVote(postId, voteType) {
-    // Implement your AJAX call here
-    console.log(`Saving ${voteType}vote for post ${postId}`);
 }

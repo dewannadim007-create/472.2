@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -15,46 +15,61 @@ import org.springframework.security.web.SecurityFilterChain;
 
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+        @Autowired
+        private CustomUserDetailsService userDetailsService;
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Autowired
+        private RoleBasedAuthenticationSuccessHandler authenticationSuccessHandler;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .userDetailsService(userDetailsService)
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/css/**", "/images/**", "/uploads/**").permitAll()
-                .requestMatchers("/login", "/register", "/").permitAll()
-                .requestMatchers("/reader/**").hasRole("READER")
-                .requestMatchers("/writer/**").hasRole("WRITER")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/dashboard", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-            );
-        
-        return http.build();
-    }
+        @Bean
+        public BCryptPasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-} 
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .userDetailsService(userDetailsService)
+                                .authorizeHttpRequests(authz -> authz
+                                                .requestMatchers("/css/**", "/images/**", "/uploads/**").permitAll()
+                                                .requestMatchers("/landing", "/login/reader", "/login/writer",
+                                                                "/login/admin",
+                                                                "/register", "/", "/login/process")
+                                                .permitAll()
+                                                .requestMatchers("/reader/**").hasRole("READER")
+                                                .requestMatchers("/writer/**").hasRole("WRITER")
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated())
+                                .formLogin(form -> form
+                                                .loginPage("/landing")
+                                                .loginProcessingUrl("/login/process")
+                                                .usernameParameter("username")
+                                                .passwordParameter("password")
+                                                .successHandler(authenticationSuccessHandler)
+                                                .failureHandler((request, response, exception) -> {
+                                                        String expectedRole = request.getParameter("expectedRole");
+                                                        String targetUrl = "/landing?error=true";
+                                                        if ("READER".equalsIgnoreCase(expectedRole)) {
+                                                                targetUrl = "/login/reader?error=true";
+                                                        } else if ("WRITER".equalsIgnoreCase(expectedRole)) {
+                                                                targetUrl = "/login/writer?error=true";
+                                                        }
+                                                        response.sendRedirect(targetUrl);
+                                                })
+                                                .permitAll())
+                                .logout(logout -> logout
+                                                .logoutUrl("/logout")
+                                                .logoutSuccessUrl("/landing?logout=true")
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID")
+                                                .permitAll());
+
+                return http.build();
+        }
+
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+                        throws Exception {
+                return authenticationConfiguration.getAuthenticationManager();
+        }
+}

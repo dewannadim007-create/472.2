@@ -26,6 +26,9 @@ public class UserService {
         if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
             return "Username is required";
         }
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            return "Email is required";
+        }
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
             return "Password is required";
         }
@@ -45,12 +48,17 @@ public class UserService {
         if (userRepository.existsByUsername(dto.getUsername())) {
             return "Username already exists";
         }
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            return "Email already exists";
+        }
 
         User user = new User();
         user.setUsername(dto.getUsername().trim());
+        user.setEmail(dto.getEmail().trim());
         user.setPassword(passwordEncoder.encode(dto.getPassword().trim()));
         user.setName(dto.getName().trim());
         user.setRole(dto.getRole());
+        user.setAccountStatus("ACTIVE");
         user.setInterests(dto.getInterests() != null ? dto.getInterests() : new ArrayList<>());
         user.setFollowingWriters(new ArrayList<>());
         user.setFollowers(new ArrayList<>());
@@ -67,7 +75,13 @@ public class UserService {
             return null;
         }
 
-        Optional<User> userOpt = userRepository.findByUsername(dto.getUsername().trim());
+        String identifier = dto.getUsername().trim();
+        Optional<User> userOpt = userRepository.findByUsername(identifier);
+
+        if (!userOpt.isPresent()) {
+            userOpt = userRepository.findByEmail(identifier);
+        }
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             String storedPassword = user.getPassword();
@@ -156,12 +170,29 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
+    public String createUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            return "Username already exists";
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return "SUCCESS";
+    }
+
     public boolean followWriter(String readerId, String writerId) {
         User reader = userRepository.findById(readerId).orElse(null);
         User writer = userRepository.findById(writerId).orElse(null);
 
         if (reader == null || writer == null || !reader.getRole().equals("READER")
                 || !writer.getRole().equals("WRITER")) {
+            return false;
+        }
+
+        if ("FREEZED".equals(reader.getAccountStatus())) {
             return false;
         }
 
@@ -191,6 +222,10 @@ public class UserService {
         User writer = userRepository.findById(writerId).orElse(null);
 
         if (reader == null || writer == null) {
+            return false;
+        }
+
+        if ("FREEZED".equals(reader.getAccountStatus())) {
             return false;
         }
 
@@ -276,6 +311,18 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public void updateUserStatus(String userId, String status) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setAccountStatus(status);
+            userRepository.save(user);
+        }
+    }
+
+    public void deleteUser(String userId) {
+        userRepository.deleteById(userId);
+    }
+
     @Autowired
     private FileUploadService fileUploadService;
 
@@ -286,12 +333,10 @@ public class UserService {
                 return "User not found";
             }
 
-            // Delete old profile photo if exists
             if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
                 fileUploadService.deleteImage(user.getProfilePhotoUrl());
             }
 
-            // Upload new photo
             String photoUrl = fileUploadService.uploadImage(photoFile);
             user.setProfilePhotoUrl(photoUrl);
             userRepository.save(user);
@@ -308,7 +353,6 @@ public class UserService {
             return "User not found";
         }
 
-        // Delete photo file if exists
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
             fileUploadService.deleteImage(user.getProfilePhotoUrl());
             user.setProfilePhotoUrl(null);

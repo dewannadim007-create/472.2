@@ -10,5 +10,8 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends MongoRepository<Comment, String> {
     List<Comment> findByPostId(String postId, Sort sort);
+
     List<Comment> findByPostIdIn(List<String> postIds, Sort sort);
-} 
+
+    List<Comment> findByAuthorId(String authorId);
+}

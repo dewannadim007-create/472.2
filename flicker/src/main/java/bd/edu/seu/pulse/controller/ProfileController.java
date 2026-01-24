@@ -191,13 +191,22 @@ public class ProfileController {
         }
     }
 
-    // Profile Photo Endpoints for Writer
     @PostMapping("/writer/profile/photo/upload")
     public String uploadWriterProfilePhoto(@RequestParam String userId,
-            @RequestParam("profilePhoto") org.springframework.web.multipart.MultipartFile photoFile,
+            @RequestParam(value = "profilePhoto", required = false) org.springframework.web.multipart.MultipartFile photoFile,
+            @RequestParam(value = "removePhoto", required = false, defaultValue = "false") boolean removePhoto,
             Model model) {
         if (userId == null || userId.trim().isEmpty()) {
             return "redirect:/login";
+        }
+
+        if (removePhoto) {
+            String result = userService.removeProfilePhoto(userId);
+            if ("SUCCESS".equals(result)) {
+                return "redirect:/writer/profile?userId=" + userId + "&successMessage=Profile photo removed!";
+            } else {
+                return "redirect:/writer/profile?userId=" + userId + "&errorMessage=" + result;
+            }
         }
 
         if (photoFile == null || photoFile.isEmpty()) {
@@ -226,13 +235,22 @@ public class ProfileController {
         }
     }
 
-    // Profile Photo Endpoints for Reader
     @PostMapping("/reader/profile/photo/upload")
     public String uploadReaderProfilePhoto(@RequestParam String userId,
-            @RequestParam("profilePhoto") org.springframework.web.multipart.MultipartFile photoFile,
+            @RequestParam(value = "profilePhoto", required = false) org.springframework.web.multipart.MultipartFile photoFile,
+            @RequestParam(value = "removePhoto", required = false, defaultValue = "false") boolean removePhoto,
             Model model) {
         if (userId == null || userId.trim().isEmpty()) {
             return "redirect:/login";
+        }
+
+        if (removePhoto) {
+            String result = userService.removeProfilePhoto(userId);
+            if ("SUCCESS".equals(result)) {
+                return "redirect:/reader/profile?userId=" + userId + "&successMessage=Profile photo removed!";
+            } else {
+                return "redirect:/reader/profile?userId=" + userId + "&errorMessage=" + result;
+            }
         }
 
         if (photoFile == null || photoFile.isEmpty()) {

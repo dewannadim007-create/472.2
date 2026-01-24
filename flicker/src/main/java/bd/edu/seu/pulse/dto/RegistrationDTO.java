@@ -4,6 +4,7 @@ import java.util.List;
 
 public class RegistrationDTO {
     private String username;
+    private String email;
     private String password;
     private String confirmPassword;
     private String name;
@@ -13,8 +14,11 @@ public class RegistrationDTO {
     public RegistrationDTO() {
     }
 
-    public RegistrationDTO(String username, String password, String confirmPassword, String name, String role, List<String> interests) {
+    public RegistrationDTO(String username, String email, String password, String confirmPassword, String name,
+            String role,
+            List<String> interests) {
         this.username = username;
+        this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.name = name;
@@ -28,6 +32,14 @@ public class RegistrationDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -69,4 +81,4 @@ public class RegistrationDTO {
     public void setInterests(List<String> interests) {
         this.interests = interests;
     }
-} 
+}

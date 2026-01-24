@@ -1,5 +1,6 @@
 package bd.edu.seu.pulse.controller;
 
+import bd.edu.seu.pulse.dto.ActivityDTO;
 import bd.edu.seu.pulse.dto.CreatePostDTO;
 import bd.edu.seu.pulse.dto.PostViewDTO;
 import bd.edu.seu.pulse.model.Post;
@@ -12,7 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/writer")
@@ -30,36 +36,129 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         User currentUser = userService.getUserById(userId);
         if (currentUser == null || !"WRITER".equals(currentUser.getRole())) {
             model.addAttribute("errorMessage", "Invalid user or not a writer");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         List<PostViewDTO> posts = postService.getPostsByWriter(userId, sortBy);
+
+        int totalComments = posts.stream()
+                .mapToInt(post -> post.getComments() != null ? post.getComments().size() : 0)
+                .sum();
+
+        List<User> followers = userService.getFollowers(userId);
+        int followerCount = followers != null ? followers.size() : 0;
+
+        final List<ActivityDTO> recentActivities = new ArrayList<>();
+
+        posts.stream().limit(3).forEach(post -> {
+            recentActivities.add(new ActivityDTO(
+                    "POST",
+                    currentUser.getName(),
+                    post.getContent().length() > 60 ? post.getContent().substring(0, 60) + "..." : post.getContent(),
+                    null,
+                    getTimeAgo(post.getTimestamp())));
+        });
+
+        posts.forEach(post -> {
+            if (post.getComments() != null && !post.getComments().isEmpty()) {
+                post.getComments().forEach(comment -> {
+                    recentActivities.add(new ActivityDTO(
+                            "COMMENT",
+                            comment.getAuthorName(),
+                            post.getContent().length() > 40 ? post.getContent().substring(0, 40) + "..."
+                                    : post.getContent(),
+                            comment.getContent(),
+                            getTimeAgo(comment.getTimestamp())));
+                });
+            }
+        });
+
+        recentActivities.sort((a, b) -> 0);
+        List<ActivityDTO> limitedActivities = recentActivities.size() > 10
+                ? recentActivities.subList(0, 10)
+                : recentActivities;
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("posts", posts);
         model.addAttribute("userId", userId);
         model.addAttribute("sortBy", sortBy);
+        model.addAttribute("totalComments", totalComments);
+        model.addAttribute("followerCount", followerCount);
+        model.addAttribute("recentActivities", limitedActivities);
 
         return "writer/home";
+    }
+
+    private String getTimeAgo(LocalDateTime timestamp) {
+        if (timestamp == null)
+            return "recently";
+
+        Duration duration = Duration.between(timestamp, LocalDateTime.now());
+        long minutes = duration.toMinutes();
+        long hours = duration.toHours();
+        long days = duration.toDays();
+
+        if (minutes < 1)
+            return "just now";
+        if (minutes < 60)
+            return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+        if (hours < 24)
+            return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+        if (days < 7)
+            return days + " day" + (days > 1 ? "s" : "") + " ago";
+        return timestamp.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+    }
+
+    @GetMapping("/my-posts")
+    public String myPosts(@RequestParam(required = false) String userId,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String filterBy,
+            Model model) {
+        if (userId == null || userId.isEmpty()) {
+            model.addAttribute("errorMessage", "User ID is required");
+            return "redirect:/login/writer";
+        }
+
+        User currentUser = userService.getUserById(userId);
+        if (currentUser == null || !"WRITER".equals(currentUser.getRole())) {
+            model.addAttribute("errorMessage", "Invalid user or not a writer");
+            return "redirect:/login/writer";
+        }
+
+        List<PostViewDTO> posts = postService.getPostsByWriter(userId, sortBy);
+
+        if (filterBy != null && !filterBy.isEmpty()) {
+            posts = posts.stream()
+                    .filter(post -> filterBy.equalsIgnoreCase(post.getVisibility()))
+                    .collect(Collectors.toList());
+        }
+
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("posts", posts);
+        model.addAttribute("userId", userId);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("filterBy", filterBy);
+
+        return "writer/my-posts";
     }
 
     @GetMapping("/post/new")
     public String showNewPostForm(@RequestParam(required = false) String userId, Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         User currentUser = userService.getUserById(userId);
         if (currentUser == null || !"WRITER".equals(currentUser.getRole())) {
             model.addAttribute("errorMessage", "Invalid user or not a writer");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         model.addAttribute("currentUser", currentUser);
@@ -75,7 +174,7 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         String result = postService.createPost(userId, createPostDTO);
@@ -99,7 +198,7 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         String result;
@@ -127,13 +226,13 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         User currentUser = userService.getUserById(userId);
         if (currentUser == null || !"WRITER".equals(currentUser.getRole())) {
             model.addAttribute("errorMessage", "Invalid user or not a writer");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         Post post = postService.getPostById(postId);
@@ -170,7 +269,7 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         String result = postService.updatePost(postId, userId, createPostDTO, imageFile, removeImage);
@@ -198,7 +297,7 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         String result = postService.deletePost(postId, userId);
@@ -218,13 +317,13 @@ public class WriterController {
             Model model) {
         if (userId == null || userId.isEmpty()) {
             model.addAttribute("errorMessage", "User ID is required");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         User currentUser = userService.getUserById(userId);
         if (currentUser == null || !"WRITER".equals(currentUser.getRole())) {
             model.addAttribute("errorMessage", "Invalid user or not a writer");
-            return "redirect:/login";
+            return "redirect:/login/writer";
         }
 
         List<User> followers = userService.getFollowers(userId);

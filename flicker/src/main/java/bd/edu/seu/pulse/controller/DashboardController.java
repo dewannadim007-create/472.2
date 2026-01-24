@@ -19,20 +19,22 @@ public class DashboardController {
     public String dashboard(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         User user = userService.getUserByUsername(username);
         if (user == null) {
             model.addAttribute("errorMessage", "User not found");
             return "redirect:/login";
         }
-        
+
         if ("READER".equals(user.getRole())) {
             return "redirect:/reader/home?userId=" + user.getId();
         } else if ("WRITER".equals(user.getRole())) {
             return "redirect:/writer/home?userId=" + user.getId();
+        } else if ("ADMIN".equals(user.getRole())) {
+            return "redirect:/admin/dashboard";
         } else {
             model.addAttribute("errorMessage", "Invalid user role");
-            return "redirect:/login";
+            return "redirect:/landing";
         }
     }
-} 
+}

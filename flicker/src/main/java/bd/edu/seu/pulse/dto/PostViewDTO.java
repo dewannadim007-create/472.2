@@ -14,16 +14,19 @@ public class PostViewDTO {
     private boolean hasUpvoted;
     private boolean hasDownvoted;
     private List<CommentViewDTO> comments;
-    
+
     private String imageUrl;
     private String imageCaption;
     private String imageFileName;
     private Long imageFileSize;
 
+    private String visibility;
+
     public PostViewDTO() {
     }
 
-    public PostViewDTO(String id, String authorId, String authorName, String content, LocalDateTime timestamp, int upvoteCount, int downvoteCount) {
+    public PostViewDTO(String id, String authorId, String authorName, String content, LocalDateTime timestamp,
+            int upvoteCount, int downvoteCount) {
         this.id = id;
         this.authorId = authorId;
         this.authorName = authorName;
@@ -144,4 +147,12 @@ public class PostViewDTO {
     public void setImageFileSize(Long imageFileSize) {
         this.imageFileSize = imageFileSize;
     }
-} 
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+}

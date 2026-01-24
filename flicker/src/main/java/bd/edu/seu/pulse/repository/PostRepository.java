@@ -10,5 +10,12 @@ import java.util.List;
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
     List<Post> findByAuthorId(String authorId, Sort sort);
+
     List<Post> findByAuthorIdIn(List<String> authorIds, Sort sort);
-} 
+
+    List<Post> findByAuthorIdAndVisibility(String authorId, String visibility, Sort sort);
+
+    List<Post> findByUpvotedByContaining(String userId);
+
+    List<Post> findByDownvotedByContaining(String userId);
+}
