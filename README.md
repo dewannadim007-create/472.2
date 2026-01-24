@@ -56,31 +56,42 @@ flicker/
    ```
 
 2. Configure MongoDB connection:
-   - Copy `.env.example` to `.env`
-   - Update the MongoDB connection string in `application.properties` or set environment variable:
+   - Set the environment variable for MongoDB:
+     ```bash
+     export MONGODB_URI=mongodb://localhost:27017/flicker
      ```
-     MONGODB_URI=mongodb://localhost:27017/FLICKER
-     ```
+   - Or use MongoDB Atlas for a cloud database (see [DEPLOYMENT.md](flicker/DEPLOYMENT.md))
 
-3. Build the project:
+3. (Optional) Configure other environment variables:
+   ```bash
+   export PORT=8080
+   export UPLOAD_DIR=uploads  # or use /tmp/uploads for cloud deployments
+   ```
+
+4. Build the project:
    ```bash
    ./mvnw clean package
    ```
 
-4. Run the application:
+5. Run the application:
    ```bash
    ./mvnw spring-boot:run
    ```
 
-5. Access the application at `http://localhost:8080`
+6. Access the application at `http://localhost:8080`
 
 ## Environment Variables
 
-Configure the following environment variables for deployment:
+Configure the following environment variables:
 
-- `MONGODB_URI`: MongoDB connection string
+- `MONGODB_URI`: MongoDB connection string (required)
+  - Local: `mongodb://localhost:27017/flicker`
+  - Atlas: `mongodb+srv://username:password@cluster.mongodb.net/flicker?retryWrites=true&w=majority`
 - `PORT`: Server port (default: 8080)
-- `UPLOAD_DIR`: Directory for file uploads (default: /tmp/uploads)
+- `UPLOAD_DIR`: Directory for file uploads (default: uploads)
+- `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name (optional, for image uploads)
+- `CLOUDINARY_API_KEY`: Cloudinary API key (optional)
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret (optional)
 
 ## Deployment
 
