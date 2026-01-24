@@ -65,7 +65,7 @@ flicker/
 3. (Optional) Configure other environment variables:
    ```bash
    export PORT=8080
-   export UPLOAD_DIR=/tmp/uploads
+   export UPLOAD_DIR=uploads  # or use /tmp/uploads for cloud deployments
    ```
 
 4. Build the project:
