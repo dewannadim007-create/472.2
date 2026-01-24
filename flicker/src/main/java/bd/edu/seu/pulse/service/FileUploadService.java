@@ -3,6 +3,8 @@ package bd.edu.seu.pulse.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class FileUploadService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileUploadService.class);
 
     @Value("${cloudinary.cloud-name}")
     private String cloudName;
@@ -34,8 +38,9 @@ public class FileUploadService {
                     "cloud_name", cloudName,
                     "api_key", apiKey,
                     "api_secret", apiSecret));
+            logger.info("Cloudinary configured successfully");
         } else {
-            System.err.println("WARNING: Cloudinary credentials not configured. Image upload features will not work.");
+            logger.warn("Cloudinary credentials not configured. Image upload features will not work.");
         }
     }
 
@@ -67,7 +72,7 @@ public class FileUploadService {
 
     public boolean deleteImage(String imageUrl) {
         if (cloudinary == null) {
-            System.err.println("WARNING: Cloudinary is not configured. Cannot delete image.");
+            logger.warn("Cloudinary is not configured. Cannot delete image.");
             return false;
         }
         
@@ -88,7 +93,7 @@ public class FileUploadService {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error deleting image from Cloudinary", e);
             return false;
         }
         return false;
