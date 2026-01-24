@@ -198,6 +198,7 @@
                                 class="btn btn-sm btn-secondary">Edit</a>
                             <form th:action="@{/writer/post/{postId}/delete(postId=${post.id})}" method="post"
                                 style="display:inline;" onsubmit="return confirm('Delete this post?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <input type="hidden" name="userId" th:value="${userId}" />
                                 <button type="submit" class="btn btn-sm btn-danger-outline">Delete</button>
                             </form>
@@ -280,6 +281,8 @@
                                                 Comment
                                             </h4>
                                             <form th:action="@{/report/create}" method="post">
+                                                <input type="hidden" th:name="${_csrf.parameterName}"
+                                                    th:value="${_csrf.token}" />
                                                 <input type="hidden" name="reporterId" th:value="${userId}" />
                                                 <input type="hidden" name="entityId" th:value="${comment.id}" />
                                                 <input type="hidden" name="type" value="COMMENT" />
