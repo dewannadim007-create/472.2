@@ -143,7 +143,7 @@ git push
    - Ensure IP address `0.0.0.0/0` is added (allows connections from anywhere)
    
 2. **Check your connection string format**:
-   - Must include the database name: `mongodb+srv://user:pass@cluster.mongodb.net/FLICKER?...`
+   - Must include the database name: `mongodb+srv://user:pass@cluster.mongodb.net/flicker?...`
    - Remove `appName` parameter if present (can cause DNS issues)
    - Ensure it starts with `mongodb+srv://` for Atlas or `mongodb://` for standard connection
    
@@ -152,7 +152,7 @@ git push
    - Example: `@` becomes `%40`, `#` becomes `%23`
    
 4. **Verify database name is in the connection string**:
-   - Should be: `.../FLICKER?retryWrites=true...`
+   - Should be: `.../flicker?retryWrites=true...`
    - Not: `.../?retryWrites=true...`
    
 5. **Check environment variable is set correctly in Render**:
