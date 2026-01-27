@@ -350,6 +350,8 @@ h6 {
     backdrop-filter: blur(20px);
     transition: transform 0.3s ease, width 0.3s ease;
     width: var(--sidebar-width);
+    min-height: 0;
+    /* Fix grid overflow */
 }
 
 /* Sidebar collapsed state - desktop */
@@ -495,6 +497,8 @@ body.sidebar-collapsed {
     flex-direction: column;
     align-items: center;
     scroll-behavior: smooth;
+    min-height: 0;
+    /* Fix so grid item shrinks to track height */
 }
 
 .container>* {
