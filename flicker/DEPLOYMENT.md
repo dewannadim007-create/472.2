@@ -84,8 +84,13 @@ Click **"Advanced"** → **"Add Environment Variable"** and add:
 
 **Example MONGODB_URI**:
 ```
-mongodb+srv://your-username:your-new-password@cluster.mongodb.net/FLICKER?retryWrites=true&w=majority
+mongodb+srv://your-username:your-new-password@cluster.mongodb.net/flicker?retryWrites=true&w=majority
 ```
+
+**Important Notes**:
+- Make sure the database name is `flicker` (lowercase) in the connection string
+- Ensure the MongoDB user has read/write permissions on the database
+- Verify Network Access in MongoDB Atlas allows connections from `0.0.0.0/0`
 
 ### 3.4 Deploy
 
